@@ -3,7 +3,7 @@ import PathComparisonChart from "../charts/PathComparisonChart";
 
 function PathCard({ path, index }) {
   const [open, setOpen] = useState(index === 0);
-  const probColor = path.successProbability >= 65 ? "#50a878" : path.successProbability >= 40 ? "#c87830" : "#c85050";
+  const probColor = path.successProbability >= 65 ? "var(--green)" : path.successProbability >= 40 ? "var(--orange)" : "var(--red)";
 
   return (
     <div className={`path-card${path.recommended ? " recommended" : ""}`}>
@@ -15,7 +15,7 @@ function PathCard({ path, index }) {
         </div>
         <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
           <span className="path-prob" style={{ color: probColor }}>{path.successProbability}%</span>
-          <span style={{ color: "var(--text-dim)", fontSize: 12 }}>{open ? "▲" : "▼"}</span>
+          <span style={{ color: "var(--text-dim)", fontSize: 12, transition: "transform 0.2s", transform: open ? "rotate(180deg)" : "none" }}>▼</span>
         </div>
       </div>
 
@@ -63,7 +63,7 @@ function PathCard({ path, index }) {
 export default function PathsSection({ strategicPaths }) {
   if (!strategicPaths?.length) return null;
   return (
-    <div className="section">
+    <div className="section" style={{ animationDelay: '0.35s' }}>
       <div className="section-header">
         <span className="section-num">06</span>
         <span className="section-title">Strategic Paths</span>

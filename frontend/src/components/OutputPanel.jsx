@@ -1,7 +1,16 @@
+import { useEffect, useRef } from "react";
 import Results from "./Results";
 import { LOADING_STEPS } from "../hooks/useDecisionEngine";
 
 export default function OutputPanel({ loading, loadingStep, result, error, dilemma }) {
+  const loadingRef = useRef(null);
+
+  useEffect(() => {
+    if (loading && loadingRef.current) {
+      loadingRef.current.scrollIntoView({ behavior: "smooth", block: "start" });
+    }
+  }, [loading]);
+
   return (
     <div className="output-panel">
 
@@ -17,7 +26,7 @@ export default function OutputPanel({ loading, loadingStep, result, error, dilem
       )}
 
       {loading && (
-        <div className="loading-state">
+        <div className="loading-state" ref={loadingRef}>
           <div className="spinner" />
           <div className="loading-title">Processing decision structure</div>
           <div className="loading-steps">

@@ -63,18 +63,21 @@ export default function InputPanel({
         {loading ? "Analyzing…" : "Run Strategic Analysis"}
       </button>
 
-      <div className="divider" />
-
-      <div>
-        <div className="panel-title" style={{ marginBottom: 10 }}>Example Dilemmas</div>
-        <div className="example-prompts">
-          {EXAMPLES.map((ex, i) => (
-            <button key={i} className="example-chip" onClick={() => setDilemma(ex)}>
-              {ex}
-            </button>
-          ))}
-        </div>
-      </div>
+      {!loading && (
+        <>
+          <div className="divider" />
+          <div>
+            <div className="panel-title" style={{ marginBottom: 10 }}>Example Dilemmas</div>
+            <div className="example-prompts">
+              {EXAMPLES.map((ex, i) => (
+                <button key={i} className="example-chip" onClick={() => setDilemma(ex)}>
+                  {ex}
+                </button>
+              ))}
+            </div>
+          </div>
+        </>
+      )}
     </div>
   );
 }

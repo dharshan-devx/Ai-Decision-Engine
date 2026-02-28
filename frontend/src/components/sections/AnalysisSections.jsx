@@ -1,7 +1,7 @@
 export function ProbabilisticSection({ probabilisticModel }) {
   if (!probabilisticModel) return null;
   return (
-    <div className="section">
+    <div className="section" style={{ animationDelay: '0.4s' }}>
       <div className="section-header">
         <span className="section-num">07</span>
         <span className="section-title">Probabilistic Outcomes</span>
@@ -22,14 +22,14 @@ export function ProbabilisticSection({ probabilisticModel }) {
 export function RecommendationsSection({ recommendations }) {
   if (!recommendations) return null;
   const labels = {
-    mostRational:     "Most Rational",
-    mostAggressive:   "Most Aggressive",
+    mostRational: "Most Rational",
+    mostAggressive: "Most Aggressive",
     mostConservative: "Most Conservative",
-    olderSelfView:    "Older Self",
-    highAgencyView:   "High Agency",
+    olderSelfView: "Older Self",
+    highAgencyView: "High Agency",
   };
   return (
-    <div className="section">
+    <div className="section" style={{ animationDelay: '0.45s' }}>
       <div className="section-header">
         <span className="section-num">08</span>
         <span className="section-title">Recommendation Engine</span>
@@ -50,7 +50,7 @@ export function RecommendationsSection({ recommendations }) {
 export function BiasSection({ biasDetection }) {
   if (!biasDetection?.length) return null;
   return (
-    <div className="section">
+    <div className="section" style={{ animationDelay: '0.5s' }}>
       <div className="section-header">
         <span className="section-num">09</span>
         <span className="section-title">Cognitive Bias Detection</span>
@@ -71,7 +71,7 @@ export function BiasSection({ biasDetection }) {
 export function AntifragilitySection({ antifragilityScore }) {
   if (!antifragilityScore) return null;
   return (
-    <div className="section">
+    <div className="section" style={{ animationDelay: '0.55s' }}>
       <div className="section-header">
         <span className="section-num">10</span>
         <span className="section-title">Antifragility Score</span>
@@ -89,12 +89,12 @@ export function AntifragilitySection({ antifragilityScore }) {
                 <div className="af-bar-track">
                   <div className="af-bar-fill" style={{ width: `${v}%` }} />
                 </div>
-                <span style={{ fontFamily: "var(--font-mono)", fontSize: 10, color: "var(--text-dim)", minWidth: 24 }}>{v}</span>
+                <span style={{ fontFamily: "var(--font-mono)", fontSize: 10, color: "var(--text-muted)", minWidth: 24 }}>{v}</span>
               </div>
             ))}
           </div>
           {antifragilityScore.interpretation && (
-            <div style={{ fontSize: 12, color: "var(--text-muted)", marginTop: 10, lineHeight: 1.5 }}>
+            <div style={{ fontSize: 12, color: "var(--text-muted)", marginTop: 12, lineHeight: 1.6 }}>
               {antifragilityScore.interpretation}
             </div>
           )}
