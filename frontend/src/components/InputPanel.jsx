@@ -1,7 +1,7 @@
 const EXAMPLES = [
   "Should I quit my job at a stable tech company to pursue a B2B SaaS startup in the HR space?",
-  "I'm considering relocating from NYC to Berlin for a senior engineering role — 40% salary cut but better quality of life.",
-  "Should I pursue an MBA at a top-10 school at 32, or continue building my consulting practice independently?",
+  "Should I order a large pepperoni pizza for myself at 2 AM even though I'm supposed to be on a diet, or just eat sad carrots?",
+  "I'm considering relocating my family across the country for a high-paying executive role, but my kids are finally settled in their schools. Is the financial gain worth the familial disruption?",
 ];
 
 export default function InputPanel({
@@ -9,6 +9,7 @@ export default function InputPanel({
   age, setAge,
   riskProfile, setRiskProfile,
   timeHorizon, setTimeHorizon,
+  apiKey, setApiKey,
   loading, onAnalyze,
 }) {
   return (
@@ -52,6 +53,16 @@ export default function InputPanel({
             <option value="medium-term">Medium-term (3–5 yr)</option>
             <option value="long-term">Long-term (5–10+ yr)</option>
           </select>
+        </div>
+        <div style={{ gridColumn: "1 / -1" }}>
+          <div className="field-label">Custom Gemini API Key (Optional)</div>
+          <input
+            className="field-input"
+            type="password"
+            placeholder="sk-..."
+            value={apiKey}
+            onChange={(e) => setApiKey(e.target.value)}
+          />
         </div>
       </div>
 

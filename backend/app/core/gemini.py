@@ -160,9 +160,10 @@ def repair_json(raw: str) -> dict:
     raise ValueError("Could not parse or repair AI response JSON")
 
 
-async def run_analysis(dilemma: str, age: str, risk_profile: str, time_horizon: str) -> dict:
+async def run_analysis(dilemma: str, age: str, risk_profile: str, time_horizon: str, api_key: str = None) -> dict:
     settings = get_settings()
-    client = genai.Client(api_key=settings.gemini_api_key)
+    client_key = api_key if api_key else settings.gemini_api_key
+    client = genai.Client(api_key=client_key)
 
     response = await client.aio.models.generate_content(
         model="gemini-2.5-flash",
@@ -176,3 +177,41 @@ async def run_analysis(dilemma: str, age: str, risk_profile: str, time_horizon: 
 
     raw = response.text
     return repair_json(raw)
+
+
+FOLLOWUP_SYSTEM_PROMPT = """You are a world-class strategic advisor.
+You previously provided a rigorous strategic framework for the user's dilemma.
+Now, answer their follow-up question strictly based on the provided analysis summary.
+Respond in clear, analytical prose (no JSON, no fluff)."""
+
+async def run_followup(dilemma: str, context_summary: str, question: str, api_key: str = None) -> str:
+    """Handle follow-up questions using existing analysis context."""
+    settings = get_settings()
+    client_key = api_key if api_key else settings.gemini_api_key
+    client = genai.Client(api_key=client_key)
+
+    followup_prompt = f"""You previously analyzed this decision:
+
+DILEMMA: {dilemma}
+
+Here is a summary of your analysis:
+{context_summary}
+
+The user now asks a follow-up question:
+"{question}"
+
+Provide a concise, strategic answer (2-4 paragraphs). Stay rigorous and analytical.
+Do NOT return JSON — respond in clear prose."""
+
+    response = await client.aio.models.generate_content(
+        model="gemini-2.5-flash",
+        contents=followup_prompt,
+        config=genai.types.GenerateContentConfig(
+            system_instruction=FOLLOWUP_SYSTEM_PROMPT,
+            max_output_tokens=2000,
+            temperature=0.7,
+        ),
+    )
+
+    return response.text.strip()
+

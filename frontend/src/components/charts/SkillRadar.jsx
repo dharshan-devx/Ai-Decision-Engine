@@ -19,8 +19,8 @@ export default function SkillRadar({ skillDelta }) {
         <RadarChart data={data}>
           <PolarGrid stroke="rgba(255,255,255,0.06)" />
           <PolarAngleAxis dataKey="skill" tick={{ fill: "#a8a29e", fontSize: 11, fontFamily: "Inter" }} />
-          <Radar name="Required" dataKey="required" stroke="#ef5350" fill="#ef5350" fillOpacity={0.08} />
-          <Radar name="Current" dataKey="current" stroke="#4caf7a" fill="#4caf7a" fillOpacity={0.12} />
+          <Radar name="Required" dataKey="required" stroke="#ef4743" fill="#ef4743" fillOpacity={0.08} />
+          <Radar name="Current" dataKey="current" stroke="#2cbb5d" fill="#2cbb5d" fillOpacity={0.12} />
         </RadarChart>
       </ResponsiveContainer>
     </div>

@@ -100,6 +100,7 @@ pip install -r requirements.txt
 
 # Configure environment
 cp .env.example .env
+uvicorn app.main:app --reload --port 8000
 # Edit .env and add your Gemini API key:
 #   GEMINI_API_KEY=your-gemini-api-key-here
 ```
@@ -114,6 +115,7 @@ npm install
 
 # Configure environment
 cp .env.example .env.local
+
 # Ensure VITE_API_URL=http://localhost:8000
 ```
 

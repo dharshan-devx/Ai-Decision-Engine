@@ -1,8 +1,10 @@
 import { useEffect, useRef } from "react";
+import ErrorBoundary from "./ErrorBoundary";
 import Results from "./Results";
+import FollowUp from "./FollowUp";
 import { LOADING_STEPS } from "../hooks/useDecisionEngine";
 
-export default function OutputPanel({ loading, loadingStep, result, error, dilemma }) {
+export default function OutputPanel({ loading, loadingStep, result, error, dilemma, apiKey, onShare, onExportPDF }) {
   const loadingRef = useRef(null);
 
   useEffect(() => {
@@ -27,20 +29,23 @@ export default function OutputPanel({ loading, loadingStep, result, error, dilem
 
       {loading && (
         <div className="loading-state" ref={loadingRef}>
-          <div className="spinner" />
-          <div className="loading-title">Processing decision structure</div>
-          <div className="loading-steps">
-            {LOADING_STEPS.map((step, i) => (
-              <div
-                key={i}
-                className={`loading-step${i === loadingStep ? " active" : i < loadingStep ? " done" : ""}`}
-              >
-                <span className="step-icon">
-                  {i < loadingStep ? "✓" : i === loadingStep ? "›" : "·"}
-                </span>
-                {step}
-              </div>
-            ))}
+          {/* Progress steps */}
+          <div className="loading-progress">
+            <div className="spinner" />
+            <div className="loading-title">Processing decision structure</div>
+            <div className="loading-steps">
+              {LOADING_STEPS.map((step, i) => (
+                <div
+                  key={i}
+                  className={`loading-step${i === loadingStep ? " active" : i < loadingStep ? " done" : ""}`}
+                >
+                  <span className="step-icon">
+                    {i < loadingStep ? "✓" : i === loadingStep ? "›" : "·"}
+                  </span>
+                  {step}
+                </div>
+              ))}
+            </div>
           </div>
         </div>
       )}
@@ -55,7 +60,25 @@ export default function OutputPanel({ loading, loadingStep, result, error, dilem
         </div>
       )}
 
-      {result && !loading && <Results data={result} dilemma={dilemma} />}
+      {result && !loading && (
+        <>
+          {/* Action buttons */}
+          <div className="result-actions">
+            <button className="result-action-btn" onClick={onExportPDF} title="Export as PDF">
+              📄 Export PDF
+            </button>
+            <button className="result-action-btn" onClick={onShare} title="Share Analysis">
+              🔗 Share
+            </button>
+          </div>
+
+          <ErrorBoundary>
+            <Results data={result} dilemma={dilemma} />
+          </ErrorBoundary>
+
+          <FollowUp dilemma={dilemma} analysisData={result} apiKey={apiKey} />
+        </>
+      )}
 
     </div>
   );

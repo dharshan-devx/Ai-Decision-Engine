@@ -13,14 +13,15 @@ export const LOADING_STEPS = [
 ];
 
 export function useDecisionEngine() {
-  const [dilemma, setDilemma]       = useState("");
-  const [age, setAge]               = useState("");
+  const [dilemma, setDilemma] = useState("");
+  const [age, setAge] = useState("");
   const [riskProfile, setRiskProfile] = useState("moderate");
   const [timeHorizon, setTimeHorizon] = useState("medium-term");
-  const [loading, setLoading]       = useState(false);
+  const [apiKey, setApiKey] = useState("");
+  const [loading, setLoading] = useState(false);
   const [loadingStep, setLoadingStep] = useState(0);
-  const [result, setResult]         = useState(null);
-  const [error, setError]           = useState(null);
+  const [result, setResult] = useState(null);
+  const [error, setError] = useState(null);
   const stepInterval = useRef(null);
 
   const startLoadingAnimation = () => {
@@ -40,7 +41,7 @@ export function useDecisionEngine() {
     setError(null);
     startLoadingAnimation();
     try {
-      const res = await analyzeDecision({ dilemma, age, riskProfile, timeHorizon });
+      const res = await analyzeDecision({ dilemma, age, riskProfile, timeHorizon, apiKey });
       setResult(res);
     } catch (e) {
       const msg = e?.response?.data?.detail || e.message || "Analysis failed";
@@ -57,8 +58,11 @@ export function useDecisionEngine() {
     age, setAge,
     riskProfile, setRiskProfile,
     timeHorizon, setTimeHorizon,
+    apiKey, setApiKey,
     // async state
     loading, loadingStep, result, error,
+    // setters for history/share restore
+    setResult,
     // actions
     handleAnalyze,
   };
