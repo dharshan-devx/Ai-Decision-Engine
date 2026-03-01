@@ -187,6 +187,11 @@ def repair_json(raw: str) -> dict:
     except json.JSONDecodeError:
         pass
 
+    import os
+    with open("debug_gemini.txt", "w", encoding="utf-8") as f:
+        f.write(f"--- FAILED TO PARSE AI RESPONSE ---\nLength: {len(raw)}\nContent:\n{raw}\n-----------------------------------")
+    
+    print(f"--- FAILED TO PARSE AI RESPONSE ---\nLength: {len(raw)}\nContent:\n{raw}\n-----------------------------------")
     raise ValueError("Could not parse or repair AI response JSON")
 
 
@@ -229,6 +234,7 @@ async def run_analysis(dilemma: str, age: str, risk_profile: str, time_horizon: 
             system_instruction=SYNTHESIZER_PROMPT,
             max_output_tokens=8000,
             temperature=0.7,
+            response_mime_type="application/json",
         ),
     )
 
@@ -274,10 +280,10 @@ Do NOT return JSON — respond in clear prose."""
 
 import time
 
-_last_health_status = True
+_last_health_status = "active"
 _last_health_check_time = 0
 
-async def check_api_health(api_key: str = None) -> bool:
+async def check_api_health(api_key: str = None) -> str:
     """Check if the Gemini API is reachable and has credits, caching the result for 60 seconds."""
     global _last_health_status, _last_health_check_time
     
@@ -290,9 +296,9 @@ async def check_api_health(api_key: str = None) -> bool:
     
     # If no key is set at all, we consider it offline
     if not client_key or client_key.strip() == "":
-        _last_health_status = False
+        _last_health_status = "offline"
         _last_health_check_time = current_time
-        return False
+        return "offline"
 
     client = genai.Client(api_key=client_key)
     try:
@@ -302,10 +308,14 @@ async def check_api_health(api_key: str = None) -> bool:
             contents="test",
             config=genai.types.GenerateContentConfig(max_output_tokens=5)
         )
-        _last_health_status = True
-    except Exception:
-        # Any exception (quota, auth failure, network) means it's effectively offline for users
-        _last_health_status = False
+        _last_health_status = "active"
+    except Exception as e:
+        err_msg = str(e).lower()
+        print(f"API Health Check Failed: {repr(e)}")
+        if "429" in err_msg or "quota" in err_msg or "exhausted" in err_msg:
+            _last_health_status = "quota_exceeded"
+        else:
+            _last_health_status = "offline"
         
     _last_health_check_time = current_time
     return _last_health_status

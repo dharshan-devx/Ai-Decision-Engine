@@ -1,3 +1,4 @@
+"use client";
 import { useState, useEffect } from "react";
 import { getHistory, saveHistoryApi, deleteHistoryApi, clearHistoryApi } from "../lib/api";
 
@@ -5,6 +6,7 @@ const STORAGE_KEY = "decision-engine-history";
 const MAX_ITEMS = 20;
 
 function loadHistoryLocal() {
+    if (typeof window === "undefined") return [];
     try {
         const raw = localStorage.getItem(STORAGE_KEY);
         return raw ? JSON.parse(raw) : [];
@@ -14,14 +16,16 @@ function loadHistoryLocal() {
 }
 
 function persistLocal(items) {
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(items));
+    if (typeof window !== "undefined") {
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(items));
+    }
 }
 
 export function useHistory() {
     const [history, setHistory] = useState(loadHistoryLocal);
 
     useEffect(() => {
-        const token = localStorage.getItem("de_token");
+        const token = typeof window !== "undefined" ? localStorage.getItem("de_token") : null;
         if (token) {
             getHistory().then(setHistory).catch(console.error);
         } else {
@@ -43,7 +47,7 @@ export function useHistory() {
 
         setHistory((prev) => [entry, ...prev].slice(0, MAX_ITEMS));
 
-        const token = localStorage.getItem("de_token");
+        const token = typeof window !== "undefined" ? localStorage.getItem("de_token") : null;
         if (token) {
             try {
                 await saveHistoryApi({ dilemma, age, riskProfile, timeHorizon, result_data: data });
@@ -56,7 +60,7 @@ export function useHistory() {
 
     const deleteAnalysis = async (id) => {
         setHistory((prev) => prev.filter((e) => e.id !== id));
-        const token = localStorage.getItem("de_token");
+        const token = typeof window !== "undefined" ? localStorage.getItem("de_token") : null;
         if (token) {
             try { await deleteHistoryApi(id); } catch (e) { }
         }
@@ -64,7 +68,7 @@ export function useHistory() {
 
     const clearHistory = async () => {
         setHistory([]);
-        const token = localStorage.getItem("de_token");
+        const token = typeof window !== "undefined" ? localStorage.getItem("de_token") : null;
         if (token) {
             try { await clearHistoryApi(); } catch (e) { }
         }

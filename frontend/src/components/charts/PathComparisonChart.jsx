@@ -1,3 +1,4 @@
+"use client";
 import { BarChart, Bar, XAxis, YAxis, Tooltip, CartesianGrid, ResponsiveContainer } from "recharts";
 
 export default function PathComparisonChart({ paths }) {
@@ -28,3 +29,4 @@ export default function PathComparisonChart({ paths }) {
     </div>
   );
 }
+

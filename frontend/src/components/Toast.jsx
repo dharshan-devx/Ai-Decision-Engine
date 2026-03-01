@@ -1,3 +1,4 @@
+"use client";
 import { useState, useEffect } from "react";
 
 export default function Toast({ message, onClose }) {
@@ -18,3 +19,4 @@ export default function Toast({ message, onClose }) {
         </div>
     );
 }
+

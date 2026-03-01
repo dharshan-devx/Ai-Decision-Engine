@@ -1,3 +1,4 @@
+"use client";
 import { useState } from "react";
 import { askFollowUp } from "../lib/api";
 
@@ -84,3 +85,4 @@ export default function FollowUp({ dilemma, analysisData, apiKey }) {
         </div>
     );
 }
+

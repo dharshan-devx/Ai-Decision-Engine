@@ -1,3 +1,4 @@
+"use client";
 export default function HistoryPanel({ history, onSelect, onDelete, onClear, onClose }) {
     return (
         <div className="history-overlay" onClick={onClose}>
@@ -45,3 +46,4 @@ export default function HistoryPanel({ history, onSelect, onDelete, onClear, onC
         </div>
     );
 }
+

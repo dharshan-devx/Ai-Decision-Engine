@@ -1,3 +1,4 @@
+"use client";
 import { Component } from "react";
 
 export default class ErrorBoundary extends Component {
@@ -35,3 +36,4 @@ export default class ErrorBoundary extends Component {
         return this.props.children;
     }
 }
+

@@ -1,3 +1,4 @@
+"use client";
 import { RadarChart, Radar, PolarGrid, PolarAngleAxis, ResponsiveContainer } from "recharts";
 
 export default function SkillRadar({ skillDelta }) {
@@ -26,3 +27,4 @@ export default function SkillRadar({ skillDelta }) {
     </div>
   );
 }
+

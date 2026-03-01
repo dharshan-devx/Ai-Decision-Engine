@@ -1,3 +1,4 @@
+"use client";
 export default function PrintTemplate({ data, dilemma }) {
     if (!data) return null;
 
@@ -141,3 +142,4 @@ export default function PrintTemplate({ data, dilemma }) {
         </div>
     );
 }
+

@@ -1,3 +1,4 @@
+"use client";
 import { useState, useEffect } from "react";
 import { analyzeDecision } from "../lib/api";
 
@@ -212,3 +213,4 @@ export default function ComparePanel({ saveAnalysis, restoreData }) {
         </div>
     );
 }
+

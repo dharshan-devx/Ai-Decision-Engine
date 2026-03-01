@@ -1,3 +1,4 @@
+"use client";
 const EXAMPLES = [
   "Should I quit my job at a stable tech company to pursue a B2B SaaS startup in the HR space?",
   "Should I order a large pepperoni pizza for myself at 2 AM even though I'm supposed to be on a diet, or just eat sad carrots?",
@@ -18,7 +19,7 @@ export default function InputPanel({
     <div className="input-panel">
       <div className="panel-title">
         Decision Input
-        <span className="tooltip-icon" title="State the problem clearly. Include any relevant background, constraints, or ultimate goals you are trying to achieve.">?</span>
+        <span className="tooltip-icon" data-tooltip="State the problem clearly. Include any relevant background, constraints, or ultimate goals you are trying to achieve.">?</span>
       </div>
 
       <div className="dilemma-area">
@@ -35,9 +36,9 @@ export default function InputPanel({
 
       <div className="context-fields">
         <div>
-          <div className="field-label">
+          <div className="field-label" style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
             Age (optional)
-            <span className="tooltip-icon" title="Used to factor in life-stage impacts on risk tolerance and timeline.">?</span>
+            <span className="tooltip-icon" data-tooltip="Used to factor in life-stage impacts on risk tolerance and timeline.">?</span>
           </div>
           <input
             className="field-input"
@@ -48,9 +49,9 @@ export default function InputPanel({
           />
         </div>
         <div>
-          <div className="field-label">
+          <div className="field-label" style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
             Risk Profile
-            <span className="tooltip-icon" title="Conservative: Prefers safety. Moderate: Balanced. Aggressive: High risk tolerance. Contrarian: Against the grain.">?</span>
+            <span className="tooltip-icon" data-tooltip="Conservative: Prefers safety. Moderate: Balanced. Aggressive: High risk tolerance. Contrarian: Against the grain.">?</span>
           </div>
           <select className="field-select" value={riskProfile} onChange={(e) => setRiskProfile(e.target.value)}>
             <option value="conservative">Conservative</option>
@@ -60,9 +61,9 @@ export default function InputPanel({
           </select>
         </div>
         <div>
-          <div className="field-label">
+          <div className="field-label" style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
             Time Horizon
-            <span className="tooltip-icon" title="How far out you are looking for this decision's impact to play out.">?</span>
+            <span className="tooltip-icon" data-tooltip="How far out you are looking for this decision's impact to play out.">?</span>
           </div>
           <select className="field-select" value={timeHorizon} onChange={(e) => setTimeHorizon(e.target.value)}>
             <option value="short-term">Short-term (1–2 yr)</option>
@@ -71,9 +72,9 @@ export default function InputPanel({
           </select>
         </div>
         <div style={{ gridColumn: "1 / -1" }}>
-          <div className="field-label">
+          <div className="field-label" style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
             Custom Gemini API Key (Optional)
-            <span className="tooltip-icon" title="Bring your own API key if you hit rate limits.">?</span>
+            <span className="tooltip-icon" data-tooltip="Bring your own API key if you hit rate limits.">?</span>
           </div>
           <input
             className="field-input"
@@ -111,3 +112,4 @@ export default function InputPanel({
     </div>
   );
 }
+

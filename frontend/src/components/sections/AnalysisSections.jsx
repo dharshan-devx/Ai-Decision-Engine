@@ -1,3 +1,4 @@
+"use client";
 export function ProbabilisticSection({ probabilisticModel }) {
   if (!probabilisticModel) return null;
   return (
@@ -103,3 +104,4 @@ export function AntifragilitySection({ antifragilityScore }) {
     </div>
   );
 }
+

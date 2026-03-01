@@ -1,3 +1,4 @@
+"use client";
 import { useState, useRef } from "react";
 import { analyzeDecision } from "../lib/api";
 
@@ -42,7 +43,7 @@ export function useDecisionEngine() {
     try {
       const formData = new FormData();
       formData.append("file", file);
-      const host = import.meta.env.VITE_API_URL || "http://localhost:8000";
+      const host = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
       const res = await fetch(`${host}/api/upload-context`, {
         method: "POST",
         body: formData,
@@ -88,3 +89,4 @@ export function useDecisionEngine() {
     handleAnalyze,
   };
 }
+

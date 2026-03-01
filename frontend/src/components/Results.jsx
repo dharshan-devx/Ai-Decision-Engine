@@ -1,3 +1,4 @@
+"use client";
 import { useState } from "react";
 import SkillRadar from "./charts/SkillRadar";
 import RiskSection from "./sections/RiskSection";
@@ -49,18 +50,38 @@ export default function Results({ data, dilemma }) {
         </div>
       </div>
 
-      <div className="view-toggle" style={{ display: 'flex', gap: '8px', marginBottom: '24px' }}>
+      <div className="view-toggle" style={{ display: 'flex', background: 'var(--surface2)', borderRadius: '12px', padding: '4px', gap: '4px', marginBottom: '32px', width: 'fit-content', border: '1px solid var(--border)' }}>
         <button
           className={`toggle-btn ${viewMode === 'text' ? 'active' : ''}`}
           onClick={() => setViewMode('text')}
-          style={{ padding: '8px 16px', borderRadius: '8px', border: '1px solid #374151', background: viewMode === 'text' ? '#3b82f6' : 'transparent', color: viewMode === 'text' ? '#fff' : '#9ca3af', cursor: 'pointer' }}
+          style={{
+            padding: '10px 20px',
+            borderRadius: '8px',
+            border: 'none',
+            background: viewMode === 'text' ? 'var(--accent)' : 'transparent',
+            color: viewMode === 'text' ? '#000' : 'var(--text-muted)',
+            fontWeight: viewMode === 'text' ? '600' : '500',
+            cursor: 'pointer',
+            transition: 'all 0.2s',
+            boxShadow: viewMode === 'text' ? 'var(--shadow-sm)' : 'none'
+          }}
         >
           Detailed Text Report
         </button>
         <button
           className={`toggle-btn ${viewMode === 'tree' ? 'active' : ''}`}
           onClick={() => setViewMode('tree')}
-          style={{ padding: '8px 16px', borderRadius: '8px', border: '1px solid #374151', background: viewMode === 'tree' ? '#10b981' : 'transparent', color: viewMode === 'tree' ? '#fff' : '#9ca3af', cursor: 'pointer' }}
+          style={{
+            padding: '10px 20px',
+            borderRadius: '8px',
+            border: 'none',
+            background: viewMode === 'tree' ? 'var(--accent)' : 'transparent',
+            color: viewMode === 'tree' ? '#000' : 'var(--text-muted)',
+            fontWeight: viewMode === 'tree' ? '600' : '500',
+            cursor: 'pointer',
+            transition: 'all 0.2s',
+            boxShadow: viewMode === 'tree' ? 'var(--shadow-sm)' : 'none'
+          }}
         >
           Branching Decision Tree
         </button>
@@ -222,3 +243,4 @@ export default function Results({ data, dilemma }) {
     </div>
   );
 }
+

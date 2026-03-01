@@ -1,3 +1,4 @@
+"use client";
 import { useMemo, useCallback } from "react";
 import {
     ReactFlow,
@@ -66,10 +67,12 @@ export default function DecisionTree({ data }) {
                 )
             },
             style: {
-                background: '#1f2937',
-                color: '#fff',
-                border: '1px solid #374151',
+                background: 'var(--surface2)',
+                color: 'var(--text)',
+                border: '1px solid var(--border)',
                 borderRadius: '12px',
+                boxShadow: 'var(--shadow-md)',
+                backdropFilter: 'blur(10px)',
                 width: 250,
             }
         }));
@@ -83,10 +86,11 @@ export default function DecisionTree({ data }) {
             target: String(e.target),
             label: e.label,
             animated: true,
-            style: { stroke: '#10b981', strokeWidth: 2 },
-            labelStyle: { fill: '#9ca3af', fontWeight: 500 },
-            labelBgStyle: { fill: '#1f2937' },
-            markerEnd: { type: MarkerType.ArrowClosed, color: '#10b981' },
+            type: 'smoothstep',
+            style: { stroke: 'var(--accent)', strokeWidth: 2 },
+            labelStyle: { fill: 'var(--text)', fontWeight: 500 },
+            labelBgStyle: { fill: 'var(--surface)', fillOpacity: 0.9, rx: 4, ry: 4 },
+            markerEnd: { type: MarkerType.ArrowClosed, color: 'var(--accent)' },
         }));
     }, [data]);
 
@@ -111,16 +115,27 @@ export default function DecisionTree({ data }) {
                 onEdgesChange={onEdgesChange}
                 fitView
                 attributionPosition="bottom-right"
+                proOptions={{ hideAttribution: true }}
             >
-                <Controls style={{ background: '#1f2937', color: '#fff' }} />
-                <MiniMap
-                    nodeStrokeColor="#374151"
-                    nodeColor="#1f2937"
-                    maskColor="rgba(0,0,0,0.5)"
-                    style={{ background: '#111827' }}
+                <Controls
+                    showInteractive={false}
+                    style={{
+                        background: 'var(--glass)',
+                        borderColor: 'var(--border)',
+                        borderRadius: '8px',
+                        overflow: 'hidden',
+                        boxShadow: 'var(--shadow-md)'
+                    }}
                 />
-                <Background color="#374151" gap={16} />
+                <MiniMap
+                    nodeStrokeColor="var(--border)"
+                    nodeColor="var(--surface3)"
+                    maskColor="var(--bg-accent)"
+                    style={{ background: 'var(--bg)', border: '1px solid var(--border)', borderRadius: '12px' }}
+                />
+                <Background color="var(--border-light)" variant="dots" gap={16} size={1.5} />
             </ReactFlow>
         </div>
     );
 }
+

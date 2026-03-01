@@ -1,13 +1,14 @@
+"use client";
 import { useState, useEffect, useRef, useCallback } from "react";
-import Header from "./components/Header";
-import InputPanel from "./components/InputPanel";
-import OutputPanel from "./components/OutputPanel";
-import HistoryPanel from "./components/HistoryPanel";
-import ComparePanel from "./components/ComparePanel";
-import Toast from "./components/Toast";
-import PrintTemplate from "./components/PrintTemplate";
-import { useDecisionEngine } from "./hooks/useDecisionEngine";
-import { useHistory } from "./hooks/useHistory";
+import Header from "../components/Header";
+import InputPanel from "../components/InputPanel";
+import OutputPanel from "../components/OutputPanel";
+import HistoryPanel from "../components/HistoryPanel";
+import ComparePanel from "../components/ComparePanel";
+import Toast from "../components/Toast";
+import PrintTemplate from "../components/PrintTemplate";
+import { useDecisionEngine } from "../hooks/useDecisionEngine";
+import { useHistory } from "../hooks/useHistory";
 
 export default function App() {
   const engine = useDecisionEngine();
@@ -167,3 +168,4 @@ export default function App() {
     </div >
   );
 }
+

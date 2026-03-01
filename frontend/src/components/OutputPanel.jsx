@@ -1,3 +1,4 @@
+"use client";
 import { useEffect, useRef } from "react";
 import ErrorBoundary from "./ErrorBoundary";
 import Results from "./Results";
@@ -55,7 +56,7 @@ export default function OutputPanel({ loading, loadingStep, result, error, dilem
           <div style={{ marginBottom: 8, fontFamily: "var(--font-display)", fontSize: 16 }}>Analysis Error</div>
           {error}
           <div style={{ marginTop: 12, color: "var(--text-dim)" }}>
-            Check that the backend is running and GEMINI_API_KEY is set correctly.
+            Check that the backend is running, your GEMINI_API_KEY is set, and you have sufficient API Quota.
           </div>
         </div>
       )}
@@ -83,3 +84,4 @@ export default function OutputPanel({ loading, loadingStep, result, error, dilem
     </div>
   );
 }
+

@@ -1,8 +1,9 @@
+"use client";
 import axios from "axios";
 
 // In production: VITE_API_URL = https://your-app.railway.app
 // In dev:        VITE_API_URL = http://localhost:8000
-const BASE_URL = import.meta.env.VITE_API_URL || "http://localhost:8000";
+const BASE_URL = process.env.NEXT_PUBLIC_API_URL || process.env.VITE_API_URL || "http://localhost:8000";
 
 const api = axios.create({
   baseURL: BASE_URL + "/api", // added /api prefix
@@ -84,3 +85,4 @@ export async function clearHistoryApi() {
 }
 
 export default api;
+

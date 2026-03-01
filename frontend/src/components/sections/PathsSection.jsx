@@ -1,3 +1,4 @@
+"use client";
 import { useState } from "react";
 import PathComparisonChart from "../charts/PathComparisonChart";
 
@@ -75,3 +76,4 @@ export default function PathsSection({ strategicPaths }) {
     </div>
   );
 }
+

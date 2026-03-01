@@ -1,3 +1,4 @@
+"use client";
 function RiskCard({ risk }) {
   const color = { high: "var(--red)", medium: "var(--orange)", low: "var(--green)" }[risk.level] || "var(--text-muted)";
   return (
@@ -26,3 +27,4 @@ export default function RiskSection({ riskAnalysis }) {
     </div>
   );
 }
+

@@ -1,22 +1,24 @@
+"use client";
 import { useState, useEffect } from "react";
 import api from "../lib/api";
 
 export default function Header({ showHistory, setShowHistory, compareMode, setCompareMode }) {
-  const [theme, setTheme] = useState(() => localStorage.getItem("de-theme") || "dark");
   const [apiActive, setApiActive] = useState(true);
 
   useEffect(() => {
-    document.documentElement.setAttribute("data-theme", theme);
-    localStorage.setItem("de-theme", theme);
-  }, [theme]);
+    if (typeof window !== "undefined") {
+      document.documentElement.setAttribute("data-theme", "dark");
+      localStorage.setItem("de-theme", "dark");
+    }
+  }, []);
 
   useEffect(() => {
     const checkHealth = async () => {
       try {
         const res = await api.get("/health");
-        setApiActive(res.data.api_active ?? true);
+        setApiActive(res.data.api_active ?? "active");
       } catch (e) {
-        setApiActive(false);
+        setApiActive("offline");
       }
     };
 
@@ -49,15 +51,13 @@ export default function Header({ showHistory, setShowHistory, compareMode, setCo
         >
           📋
         </button>
-        <button className="header-icon-btn" onClick={toggleTheme} title="Toggle Theme">
-          {theme === "dark" ? "☀" : "☾"}
-        </button>
         <span className="header-badge">Powered by Gemini</span>
         <div className="header-status">
-          <div className={apiActive ? "status-dot" : "status-dot-offline"} />
-          {apiActive ? "AI Layer Active" : "AI Layer Offline"}
+          <div className={apiActive === "active" ? "status-dot" : apiActive === "quota_exceeded" ? "status-dot-quota" : "status-dot-offline"} />
+          {apiActive === "active" ? "AI Layer Active" : apiActive === "quota_exceeded" ? "API Quota Exceeded" : "AI Layer Offline"}
         </div>
       </div>
     </header>
   );
 }
+
