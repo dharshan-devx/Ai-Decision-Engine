@@ -82,21 +82,51 @@ JSON_SCHEMA = """
     "primaryRegretRisk": "string",
     "recommendation": "string"
   },
+  "decisionTree": {
+    "nodes": [
+      { "id": "string", "label": "string", "type": "decision|chance|endpoint", "description": "string" }
+    ],
+    "edges": [
+      { "source": "string", "target": "string", "label": "string" }
+    ]
+  },
   "confidenceScore": 0,
   "confidenceNote": "string"
 }"""
 
+AGENT_A_PROMPT = """You are the 'Optimist/Visionary' agent.
+Your goal is to fiercely argue for the highest upside path of the user's dilemma.
+Ignore constraints for a moment. What is the absolute best-case scenario? How could this decision lead to massive exponential returns, growth, or wild success?
+Be persuasive, bold, and visionary. Keep it under 200 words."""
 
-def build_user_prompt(dilemma: str, age: str, risk_profile: str, time_horizon: str) -> str:
-    return f"""Analyze this decision with maximum rigor and intellectual honesty:
+AGENT_B_PROMPT = """You are the 'Risk Manager / Skeptic' agent.
+Your goal is to poke holes in the user's dilemma and find dangerous edge-cases.
+What are the hidden traps? What happens if they fail catastrophically? What are the irreversible consequences?
+Be ruthless, cynical, and highly analytical. Keep it under 200 words."""
 
-DILEMMA: {dilemma}
-USER AGE: {age or 'unknown'}
-RISK PROFILE: {risk_profile or 'moderate'}
-TIME HORIZON: {time_horizon or 'medium-term'}
+SYNTHESIZER_PROMPT = """You are the 'Synthesizer' agent — a world-class strategic advisor.
+You transform life and career dilemmas into rigorous strategic frameworks.
+You will be provided the user's dilemma, along with two differing perspectives: an Optimist's view, and a Risk Manager's view.
+Use both perspectives to generate a balanced, probabilistic, and highly structured final decision framework.
+You must respond ONLY with valid JSON matching the exact schema provided. No prose. No markdown. Pure JSON.
+Pay special attention to constructing the `decisionTree` field with logical branching paths (at least 4-5 nodes)."""
 
-Be concise in all string values (1-2 sentences max per field).
-Return ONLY the following JSON structure (no other text):
+
+def build_agent_prompt(dilemma: str, age: str, risk_profile: str, time_horizon: str, context: str = "") -> str:
+    prompt = f"DILEMMA: {dilemma}\nUSER AGE: {age or 'unknown'}\nRISK PROFILE: {risk_profile or 'moderate'}\nTIME HORIZON: {time_horizon or 'medium-term'}\n"
+    if context: prompt += f"ADDITIONAL CONTEXT:\n{context}\n\n"
+    return prompt
+
+def build_synthesizer_prompt(base_prompt: str, optimist_text: str, risk_manager_text: str) -> str:
+    return f"""{base_prompt}
+---
+OPTIMIST PERSPECTIVE:
+{optimist_text}
+---
+RISK MANAGER PERSPECTIVE:
+{risk_manager_text}
+---
+Be concise in all string values. Return ONLY the following JSON structure:
 {JSON_SCHEMA}"""
 
 
@@ -160,16 +190,43 @@ def repair_json(raw: str) -> dict:
     raise ValueError("Could not parse or repair AI response JSON")
 
 
-async def run_analysis(dilemma: str, age: str, risk_profile: str, time_horizon: str, api_key: str = None) -> dict:
+import asyncio
+
+async def run_analysis(dilemma: str, age: str, risk_profile: str, time_horizon: str, context: str = "", api_key: str = None) -> dict:
     settings = get_settings()
     client_key = api_key if api_key else settings.gemini_api_key
     client = genai.Client(api_key=client_key)
 
-    response = await client.aio.models.generate_content(
+    base_prompt = build_agent_prompt(dilemma, age, risk_profile, time_horizon, context)
+
+    # Run Agent A and Agent B concurrently
+    async def run_agent(sys_instruction: str) -> str:
+        res = await asyncio.to_thread(
+            client.models.generate_content,
+            model="gemini-2.5-flash",
+            contents=base_prompt,
+            config=genai.types.GenerateContentConfig(
+                system_instruction=sys_instruction,
+                max_output_tokens=1000,
+                temperature=0.8,
+            )
+        )
+        return res.text
+
+    optimist_text, risk_text = await asyncio.gather(
+        run_agent(AGENT_A_PROMPT),
+        run_agent(AGENT_B_PROMPT)
+    )
+
+    # Run Agent C (Synthesizer)
+    synth_prompt = build_synthesizer_prompt(base_prompt, optimist_text, risk_text)
+    
+    response = await asyncio.to_thread(
+        client.models.generate_content,
         model="gemini-2.5-flash",
-        contents=build_user_prompt(dilemma, age, risk_profile, time_horizon),
+        contents=synth_prompt,
         config=genai.types.GenerateContentConfig(
-            system_instruction=SYSTEM_PROMPT,
+            system_instruction=SYNTHESIZER_PROMPT,
             max_output_tokens=8000,
             temperature=0.7,
         ),
@@ -215,3 +272,40 @@ Do NOT return JSON — respond in clear prose."""
 
     return response.text.strip()
 
+import time
+
+_last_health_status = True
+_last_health_check_time = 0
+
+async def check_api_health(api_key: str = None) -> bool:
+    """Check if the Gemini API is reachable and has credits, caching the result for 60 seconds."""
+    global _last_health_status, _last_health_check_time
+    
+    current_time = time.time()
+    if current_time - _last_health_check_time < 60:
+        return _last_health_status
+
+    settings = get_settings()
+    client_key = api_key if api_key else settings.gemini_api_key
+    
+    # If no key is set at all, we consider it offline
+    if not client_key or client_key.strip() == "":
+        _last_health_status = False
+        _last_health_check_time = current_time
+        return False
+
+    client = genai.Client(api_key=client_key)
+    try:
+        # Minimal request to test quota/connectivity
+        await client.aio.models.generate_content(
+            model="gemini-2.5-flash",
+            contents="test",
+            config=genai.types.GenerateContentConfig(max_output_tokens=5)
+        )
+        _last_health_status = True
+    except Exception:
+        # Any exception (quota, auth failure, network) means it's effectively offline for users
+        _last_health_status = False
+        
+    _last_health_check_time = current_time
+    return _last_health_status

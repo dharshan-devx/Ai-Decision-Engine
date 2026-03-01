@@ -2,14 +2,13 @@ import { useState, useRef } from "react";
 import { analyzeDecision } from "../lib/api";
 
 export const LOADING_STEPS = [
-  "Decomposing decision structure",
-  "Mapping constraints and dependencies",
-  "Running risk heuristics",
-  "Generating strategic paths",
-  "Calibrating probabilistic model",
-  "Computing antifragility scores",
-  "Detecting cognitive bias patterns",
-  "Synthesizing recommendation engine",
+  "Agent A (Optimist) is exploring maximum upside...",
+  "Agent B (Risk Manager) is stress-testing failure modes...",
+  "Agent C (Synthesizer) is balancing perspectives...",
+  "Generating multi-branch decision tree...",
+  "Calibrating probabilistic confidence model...",
+  "Running bias detection heuristics...",
+  "Finalizing executive recommendation...",
 ];
 
 export function useDecisionEngine() {
@@ -18,6 +17,8 @@ export function useDecisionEngine() {
   const [riskProfile, setRiskProfile] = useState("moderate");
   const [timeHorizon, setTimeHorizon] = useState("medium-term");
   const [apiKey, setApiKey] = useState("");
+  const [context, setContext] = useState("");
+  const [uploading, setUploading] = useState(false);
   const [loading, setLoading] = useState(false);
   const [loadingStep, setLoadingStep] = useState(0);
   const [result, setResult] = useState(null);
@@ -34,6 +35,28 @@ export function useDecisionEngine() {
     }, 900);
   };
 
+  const handleFileUpload = async (file) => {
+    if (!file) return;
+    setUploading(true);
+    setError(null);
+    try {
+      const formData = new FormData();
+      formData.append("file", file);
+      const host = import.meta.env.VITE_API_URL || "http://localhost:8000";
+      const res = await fetch(`${host}/api/upload-context`, {
+        method: "POST",
+        body: formData,
+      });
+      if (!res.ok) throw new Error("Upload failed");
+      const data = await res.json();
+      setContext((prevText) => prevText + "\n\n" + data.text);
+    } catch (e) {
+      setError(e.message || "File upload failed");
+    } finally {
+      setUploading(false);
+    }
+  };
+
   const handleAnalyze = async () => {
     if (!dilemma.trim() || loading) return;
     setLoading(true);
@@ -41,7 +64,7 @@ export function useDecisionEngine() {
     setError(null);
     startLoadingAnimation();
     try {
-      const res = await analyzeDecision({ dilemma, age, riskProfile, timeHorizon, apiKey });
+      const res = await analyzeDecision({ dilemma, age, riskProfile, timeHorizon, context, apiKey });
       setResult(res);
     } catch (e) {
       const msg = e?.response?.data?.detail || e.message || "Analysis failed";
@@ -53,17 +76,15 @@ export function useDecisionEngine() {
   };
 
   return {
-    // form state
     dilemma, setDilemma,
     age, setAge,
     riskProfile, setRiskProfile,
     timeHorizon, setTimeHorizon,
+    context, setContext,
     apiKey, setApiKey,
-    // async state
     loading, loadingStep, result, error,
-    // setters for history/share restore
+    uploading, handleFileUpload,
     setResult,
-    // actions
     handleAnalyze,
   };
 }

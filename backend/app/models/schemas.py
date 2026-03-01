@@ -8,6 +8,7 @@ class AnalyzeRequest(BaseModel):
     age: Optional[str] = Field(None, description="User age, e.g. '34'")
     risk_profile: Optional[Literal["conservative", "moderate", "aggressive", "contrarian"]] = "moderate"
     time_horizon: Optional[Literal["short-term", "medium-term", "long-term"]] = "medium-term"
+    context: Optional[str] = Field(None, description="Optional parsed context from uploaded docs")
     api_key: Optional[str] = Field(None, description="Optional custom Gemini API key for this request")
 
     model_config = {
@@ -38,3 +39,5 @@ class AnalyzeResponse(BaseModel):
 class FollowUpResponse(BaseModel):
     success: bool = True
     answer: str
+
+

@@ -248,6 +248,14 @@ body {
   animation: pulse 2s infinite;
 }
 
+.status-dot-offline {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--red);
+  box-shadow: 0 0 4px var(--red);
+}
+
 /* ── Input Panel ─────────────────────────────────────── */
 .input-panel {
   background: var(--bg-accent);
@@ -2224,4 +2232,28 @@ body {
   .print-only {
     display: block !important;
   }
+}
+
+.tooltip-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  background: var(--surface3, rgba(255, 255, 255, 0.12));
+  color: var(--accent, #ffa116);
+  font-size: 12px;
+  font-weight: bold;
+  font-family: var(--font-mono, monospace);
+  margin-left: 8px;
+  cursor: help;
+  vertical-align: middle;
+  position: relative;
+  top: -1px;
+}
+
+.tooltip-icon:hover {
+  background: var(--accent-glow, rgba(255, 161, 22, 0.15));
+  color: var(--accent-bright, #ffb84d);
 }

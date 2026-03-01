@@ -1,15 +1,28 @@
-from fastapi import APIRouter, HTTPException, Request
+from fastapi import APIRouter, HTTPException, Request, UploadFile, File
 from app.models.schemas import AnalyzeRequest, AnalyzeResponse, FollowUpRequest, FollowUpResponse
 from app.services.analyzer import analyze_decision
-from app.core.gemini import run_followup
+from app.core.gemini import run_followup, check_api_health
 from app.core.rate_limit import limiter
+from app.services.document_parser import extract_text_from_file
+
+router = APIRouter()
+
+@router.post("/upload-context")
+async def upload_context(file: UploadFile = File(...)):
+    try:
+        content = await file.read()
+        text = await extract_text_from_file(content, file.filename)
+        return {"success": True, "text": text}
+    except Exception as e:
+        raise HTTPException(status_code=400, detail=str(e))
 
 router = APIRouter()
 
 
 @router.get("/health")
 async def health():
-    return {"status": "ok"}
+    is_active = await check_api_health()
+    return {"status": "ok", "api_active": is_active}
 
 
 @router.post("/analyze", response_model=AnalyzeResponse)

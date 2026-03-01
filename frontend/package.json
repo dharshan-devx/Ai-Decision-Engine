@@ -9,7 +9,9 @@
     "lint": "eslint src --ext .js,.jsx"
   },
   "dependencies": {
+    "@xyflow/react": "^12.10.1",
     "axios": "^1.6.7",
+    "dagre": "^0.8.5",
     "html2canvas": "^1.4.1",
     "jspdf": "^4.2.0",
     "react": "^18.2.0",

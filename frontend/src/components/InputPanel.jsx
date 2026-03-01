@@ -9,12 +9,17 @@ export default function InputPanel({
   age, setAge,
   riskProfile, setRiskProfile,
   timeHorizon, setTimeHorizon,
+  context, setContext,
+  uploading, onFileUpload,
   apiKey, setApiKey,
   loading, onAnalyze,
 }) {
   return (
     <div className="input-panel">
-      <div className="panel-title">Decision Input</div>
+      <div className="panel-title">
+        Decision Input
+        <span className="tooltip-icon" title="State the problem clearly. Include any relevant background, constraints, or ultimate goals you are trying to achieve.">?</span>
+      </div>
 
       <div className="dilemma-area">
         <textarea
@@ -26,9 +31,14 @@ export default function InputPanel({
         />
       </div>
 
+
+
       <div className="context-fields">
         <div>
-          <div className="field-label">Age (optional)</div>
+          <div className="field-label">
+            Age (optional)
+            <span className="tooltip-icon" title="Used to factor in life-stage impacts on risk tolerance and timeline.">?</span>
+          </div>
           <input
             className="field-input"
             type="number"
@@ -38,7 +48,10 @@ export default function InputPanel({
           />
         </div>
         <div>
-          <div className="field-label">Risk Profile</div>
+          <div className="field-label">
+            Risk Profile
+            <span className="tooltip-icon" title="Conservative: Prefers safety. Moderate: Balanced. Aggressive: High risk tolerance. Contrarian: Against the grain.">?</span>
+          </div>
           <select className="field-select" value={riskProfile} onChange={(e) => setRiskProfile(e.target.value)}>
             <option value="conservative">Conservative</option>
             <option value="moderate">Moderate</option>
@@ -47,7 +60,10 @@ export default function InputPanel({
           </select>
         </div>
         <div>
-          <div className="field-label">Time Horizon</div>
+          <div className="field-label">
+            Time Horizon
+            <span className="tooltip-icon" title="How far out you are looking for this decision's impact to play out.">?</span>
+          </div>
           <select className="field-select" value={timeHorizon} onChange={(e) => setTimeHorizon(e.target.value)}>
             <option value="short-term">Short-term (1–2 yr)</option>
             <option value="medium-term">Medium-term (3–5 yr)</option>
@@ -55,7 +71,10 @@ export default function InputPanel({
           </select>
         </div>
         <div style={{ gridColumn: "1 / -1" }}>
-          <div className="field-label">Custom Gemini API Key (Optional)</div>
+          <div className="field-label">
+            Custom Gemini API Key (Optional)
+            <span className="tooltip-icon" title="Bring your own API key if you hit rate limits.">?</span>
+          </div>
           <input
             className="field-input"
             type="password"

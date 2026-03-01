@@ -12,6 +12,7 @@ async def analyze_decision(request: AnalyzeRequest) -> dict:
         age=request.age or "",
         risk_profile=request.risk_profile or "moderate",
         time_horizon=request.time_horizon or "medium-term",
+        context=request.context or "",
         api_key=request.api_key,
     )
     return result

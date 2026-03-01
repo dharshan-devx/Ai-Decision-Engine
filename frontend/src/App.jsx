@@ -14,6 +14,7 @@ export default function App() {
   const { history, saveAnalysis, deleteAnalysis, clearHistory } = useHistory();
   const [showHistory, setShowHistory] = useState(false);
   const [compareMode, setCompareMode] = useState(false);
+  const [compareRestoreData, setCompareRestoreData] = useState(null);
   const [toast, setToast] = useState(null);
   const resultsRef = useRef(null);
 
@@ -58,11 +59,17 @@ export default function App() {
   }, []);
 
   const handleHistorySelect = (entry) => {
-    engine.setDilemma(entry.dilemma);
-    if (entry.age) engine.setAge(entry.age);
-    if (entry.riskProfile) engine.setRiskProfile(entry.riskProfile);
-    if (entry.timeHorizon) engine.setTimeHorizon(entry.timeHorizon);
-    engine.setResult(entry.data);
+    if (entry.data?.type === "comparison") {
+      setCompareMode(true);
+      setCompareRestoreData(entry.data.comparisonData);
+    } else {
+      engine.setDilemma(entry.dilemma);
+      if (entry.age) engine.setAge(entry.age);
+      if (entry.riskProfile) engine.setRiskProfile(entry.riskProfile);
+      if (entry.timeHorizon) engine.setTimeHorizon(entry.timeHorizon);
+      engine.setResult(entry.data);
+      setCompareMode(false);
+    }
     setShowHistory(false);
   };
 
@@ -95,48 +102,50 @@ export default function App() {
         setCompareMode={setCompareMode}
       />
 
-      {compareMode ? (
-        <div className="main">
-          <ComparePanel />
-        </div>
-      ) : (
-        <div className="main">
-          <InputPanel
-            dilemma={engine.dilemma} setDilemma={engine.setDilemma}
-            age={engine.age} setAge={engine.setAge}
-            riskProfile={engine.riskProfile} setRiskProfile={engine.setRiskProfile}
-            timeHorizon={engine.timeHorizon} setTimeHorizon={engine.setTimeHorizon}
-            apiKey={engine.apiKey} setApiKey={engine.setApiKey}
-            loading={engine.loading}
-            onAnalyze={engine.handleAnalyze}
-          />
-          <div ref={resultsRef}>
-            <OutputPanel
-              loading={engine.loading}
-              loadingStep={engine.loadingStep}
-              result={engine.result}
-              error={engine.error}
-              dilemma={engine.dilemma}
-              apiKey={engine.apiKey}
-              onShare={handleShare}
-              onExportPDF={handleExportPDF}
-            />
-          </div>
-          <div className="print-only">
-            <PrintTemplate data={engine.result} dilemma={engine.dilemma} />
-          </div>
-        </div>
-      )}
+      <div className="main" style={{ display: compareMode ? "block" : "none" }}>
+        <ComparePanel saveAnalysis={saveAnalysis} restoreData={compareRestoreData} />
+      </div>
 
-      {showHistory && (
-        <HistoryPanel
-          history={history}
-          onSelect={handleHistorySelect}
-          onDelete={deleteAnalysis}
-          onClear={clearHistory}
-          onClose={() => setShowHistory(false)}
+      <div className="main" style={{ display: !compareMode ? "block" : "none" }}>
+        <InputPanel
+          dilemma={engine.dilemma} setDilemma={engine.setDilemma}
+          age={engine.age} setAge={engine.setAge}
+          riskProfile={engine.riskProfile} setRiskProfile={engine.setRiskProfile}
+          timeHorizon={engine.timeHorizon} setTimeHorizon={engine.setTimeHorizon}
+          context={engine.context} setContext={engine.setContext}
+          uploading={engine.uploading} onFileUpload={engine.handleFileUpload}
+          apiKey={engine.apiKey} setApiKey={engine.setApiKey}
+          loading={engine.loading}
+          onAnalyze={engine.handleAnalyze}
         />
-      )}
+        <div ref={resultsRef}>
+          <OutputPanel
+            loading={engine.loading}
+            loadingStep={engine.loadingStep}
+            result={engine.result}
+            error={engine.error}
+            dilemma={engine.dilemma}
+            apiKey={engine.apiKey}
+            onShare={handleShare}
+            onExportPDF={handleExportPDF}
+          />
+        </div>
+        <div className="print-only">
+          <PrintTemplate data={engine.result} dilemma={engine.dilemma} />
+        </div>
+      </div>
+
+      {
+        showHistory && (
+          <HistoryPanel
+            history={history}
+            onSelect={handleHistorySelect}
+            onDelete={deleteAnalysis}
+            onClear={clearHistory}
+            onClose={() => setShowHistory(false)}
+          />
+        )
+      }
 
       {toast && <Toast message={toast} onClose={() => setToast(null)} />}
 
@@ -155,6 +164,6 @@ export default function App() {
           </span>
         </div>
       </footer>
-    </div>
+    </div >
   );
 }

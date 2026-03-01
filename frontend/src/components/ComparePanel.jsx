@@ -1,7 +1,7 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { analyzeDecision } from "../lib/api";
 
-export default function ComparePanel() {
+export default function ComparePanel({ saveAnalysis, restoreData }) {
     const [dilemmaA, setDilemmaA] = useState("");
     const [dilemmaB, setDilemmaB] = useState("");
     const [resultA, setResultA] = useState(null);
@@ -9,8 +9,44 @@ export default function ComparePanel() {
     const [loadingA, setLoadingA] = useState(false);
     const [loadingB, setLoadingB] = useState(false);
     const [error, setError] = useState(null);
+    const [comparisonSaved, setComparisonSaved] = useState(false);
+
+    useEffect(() => {
+        if (restoreData) {
+            setDilemmaA(restoreData.sideA?.dilemma || "");
+            setResultA(restoreData.sideA?.result || null);
+            setDilemmaB(restoreData.sideB?.dilemma || "");
+            setResultB(restoreData.sideB?.result || null);
+            setComparisonSaved(true);
+        }
+    }, [restoreData]);
+
+    useEffect(() => {
+        if (resultA && resultB && !comparisonSaved) {
+            const combinedData = {
+                type: "comparison",
+                comparisonData: {
+                    sideA: { dilemma: dilemmaA, result: resultA },
+                    sideB: { dilemma: dilemmaB, result: resultB }
+                }
+            };
+            const unifiedDilemma = `Compare: A) ${dilemmaA.substring(0, 50)}... VS B) ${dilemmaB.substring(0, 50)}...`;
+
+            if (saveAnalysis) {
+                saveAnalysis({
+                    dilemma: unifiedDilemma,
+                    age: "",
+                    riskProfile: "moderate",
+                    timeHorizon: "medium-term",
+                    data: combinedData
+                });
+                setComparisonSaved(true);
+            }
+        }
+    }, [resultA, resultB, comparisonSaved, dilemmaA, dilemmaB, saveAnalysis]);
 
     const runAnalysis = async (side) => {
+        setComparisonSaved(false);
         const dilemma = side === "A" ? dilemmaA : dilemmaB;
         if (!dilemma.trim()) return;
         const setLoading = side === "A" ? setLoadingA : setLoadingB;
@@ -99,7 +135,10 @@ export default function ComparePanel() {
             <div className="compare-grid">
                 {/* Side A */}
                 <div className="compare-side">
-                    <div className="compare-side-label">Decision A</div>
+                    <div className="compare-side-label">
+                        Decision A
+                        <span className="tooltip-icon" title="Describe the first option or path you are considering.">?</span>
+                    </div>
                     <textarea
                         className="compare-textarea"
                         placeholder="Describe decision A..."
@@ -125,7 +164,10 @@ export default function ComparePanel() {
 
                 {/* Side B */}
                 <div className="compare-side">
-                    <div className="compare-side-label">Decision B</div>
+                    <div className="compare-side-label">
+                        Decision B
+                        <span className="tooltip-icon" title="Describe the alternative option or path you are considering.">?</span>
+                    </div>
                     <textarea
                         className="compare-textarea"
                         placeholder="Describe decision B..."
@@ -144,6 +186,23 @@ export default function ComparePanel() {
                     {renderCompactResult(resultB)}
                 </div>
             </div>
+
+            {resultA && resultB && (
+                <div className="compare-synthesis" style={{ marginTop: 24, padding: 20, background: "var(--surface-light)", borderRadius: 12, border: "1px solid var(--border)" }}>
+                    <div className="panel-title" style={{ marginBottom: 16 }}>Comparison Synthesis</div>
+                    <p style={{ color: "var(--text-secondary)", lineHeight: 1.6 }}>
+                        <strong>Decision A Confidence:</strong> {resultA.confidenceScore}/100 <br />
+                        <strong>Decision B Confidence:</strong> {resultB.confidenceScore}/100 <br /><br />
+                        {resultA.confidenceScore > resultB.confidenceScore
+                            ? "Decision A generally models higher probabilistic certainty and alignment with constraints."
+                            : resultB.confidenceScore > resultA.confidenceScore
+                                ? "Decision B generally models higher probabilistic certainty and alignment with constraints."
+                                : "Both paths model similar confidence scores. Consider antifragility and personal preference as tie-breakers."}
+                        <br /><br />
+                        Full comparison data has been stored in your analysis history.
+                    </p>
+                </div>
+            )}
 
             {error && (
                 <div className="error-state" style={{ marginTop: 16 }}>

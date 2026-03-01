@@ -40,8 +40,9 @@ async def log_requests(request: Request, call_next):
     return response
 
 
-app.include_router(router)
+from app.api.routes import router
 
+app.include_router(router, prefix="/api")
 
 @app.on_event("startup")
 async def startup():
