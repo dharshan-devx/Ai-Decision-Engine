@@ -4,6 +4,7 @@ from functools import lru_cache
 
 class Settings(BaseSettings):
     gemini_api_key: str
+    database_url: str
     allowed_origins: str = "http://localhost:5173"
     port: int = 8000
 

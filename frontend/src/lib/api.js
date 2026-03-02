@@ -84,5 +84,15 @@ export async function clearHistoryApi() {
   return data;
 }
 
+export async function createShareLink(dilemma, dataPayload) {
+  const { data } = await api.post("/share", { dilemma, data: dataPayload });
+  return data;
+}
+
+export async function getSharedAnalysis(id) {
+  const { data } = await api.get(`/share/${id}`);
+  return data;
+}
+
 export default api;
 

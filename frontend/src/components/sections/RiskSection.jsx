@@ -1,4 +1,5 @@
 "use client";
+import HelpIcon from "../HelpIcon";
 function RiskCard({ risk }) {
   const color = { high: "var(--red)", medium: "var(--orange)", low: "var(--green)" }[risk.level] || "var(--text-muted)";
   return (
@@ -20,6 +21,7 @@ export default function RiskSection({ riskAnalysis }) {
       <div className="section-header">
         <span className="section-num">03</span>
         <span className="section-title">Risk Analysis</span>
+        <HelpIcon small tooltip="Potential failure modes, their severity, and strategies to mitigate them." />
       </div>
       <div className="risk-grid">
         {riskAnalysis.map((r, i) => <RiskCard key={i} risk={r} />)}

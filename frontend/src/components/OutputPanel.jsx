@@ -63,15 +63,7 @@ export default function OutputPanel({ loading, loadingStep, result, error, dilem
 
       {result && !loading && (
         <>
-          {/* Action buttons */}
-          <div className="result-actions">
-            <button className="result-action-btn" onClick={onExportPDF} title="Export as PDF">
-              📄 Export PDF
-            </button>
-            <button className="result-action-btn" onClick={onShare} title="Share Analysis">
-              🔗 Share
-            </button>
-          </div>
+          {/* Action buttons moved to page.jsx */}
 
           <ErrorBoundary>
             <Results data={result} dilemma={dilemma} />

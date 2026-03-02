@@ -1,11 +1,13 @@
 from fastapi import APIRouter, HTTPException, Request, UploadFile, File
 from app.models.schemas import AnalyzeRequest, AnalyzeResponse, FollowUpRequest, FollowUpResponse
 from app.services.analyzer import analyze_decision
-from app.core.gemini import run_followup, check_api_health
+from app.core.gemini import run_followup
+from app.core.ai_status import ai_status
 from app.core.rate_limit import limiter
 from app.services.document_parser import extract_text_from_file
 
 router = APIRouter()
+
 
 @router.post("/upload-context")
 async def upload_context(file: UploadFile = File(...)):
@@ -16,13 +18,14 @@ async def upload_context(file: UploadFile = File(...)):
     except Exception as e:
         raise HTTPException(status_code=400, detail=str(e))
 
-router = APIRouter()
-
 
 @router.get("/health")
 async def health():
-    is_active = await check_api_health()
-    return {"status": "ok", "api_active": is_active}
+    """
+    Returns stored AI status. Does NOT make any external API calls.
+    Status is updated event-driven from real /analyze and /followup requests.
+    """
+    return ai_status.to_dict()
 
 
 @router.post("/analyze", response_model=AnalyzeResponse)
@@ -39,7 +42,7 @@ async def analyze(request: AnalyzeRequest, req: Request):
     except Exception as e:
         err_str = str(e)
         if "429 RESOURCE_EXHAUSTED" in err_str or "quota" in err_str.lower():
-            raise HTTPException(status_code=429, detail="Gemini API free tier quota exceeded. Please try again later (or enter a paid API key if supported).")
+            raise HTTPException(status_code=429, detail="Gemini API free tier quota exceeded. Please try again later (or enter a paid API key).")
         raise HTTPException(status_code=500, detail=f"Analysis failed: {err_str}")
 
 
@@ -62,6 +65,13 @@ async def followup(request: FollowUpRequest, req: Request):
         if "429 RESOURCE_EXHAUSTED" in err_str or "quota" in err_str.lower():
             raise HTTPException(status_code=429, detail="Gemini API free tier quota exceeded. Please try again later.")
         raise HTTPException(status_code=500, detail=f"Follow-up failed: {err_str}")
+
+
+@router.post("/health/reset")
+async def reset_health():
+    """Manual reset of AI status (e.g., after updating API key)."""
+    ai_status.reset()
+    return {"status": "ok", "message": "AI status reset to unknown", "ai_layer": ai_status.status}
 
 
 @router.get("/usage")

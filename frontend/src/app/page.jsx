@@ -9,6 +9,9 @@ import Toast from "../components/Toast";
 import PrintTemplate from "../components/PrintTemplate";
 import { useDecisionEngine } from "../hooks/useDecisionEngine";
 import { useHistory } from "../hooks/useHistory";
+import LZString from "lz-string";
+import generatePDF from "../lib/generatePDF";
+import { createShareLink, getSharedAnalysis } from "../lib/api";
 
 export default function App() {
   const engine = useDecisionEngine();
@@ -17,7 +20,9 @@ export default function App() {
   const [compareMode, setCompareMode] = useState(false);
   const [compareRestoreData, setCompareRestoreData] = useState(null);
   const [toast, setToast] = useState(null);
+  const [printMode, setPrintMode] = useState(false);
   const resultsRef = useRef(null);
+  const [showScrollTop, setShowScrollTop] = useState(false);
 
   // Fix scroll position on reload
   useEffect(() => {
@@ -26,6 +31,17 @@ export default function App() {
     }
     window.scrollTo(0, 0);
   }, []);
+
+  // Monitor scroll for Scroll-to-Top button
+  useEffect(() => {
+    const handleScroll = () => setShowScrollTop(window.scrollY > 300);
+    window.addEventListener("scroll", handleScroll);
+    return () => window.removeEventListener("scroll", handleScroll);
+  }, []);
+
+  const scrollToTop = () => {
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  };
 
   // Auto-save analysis results to history
   useEffect(() => {
@@ -43,19 +59,56 @@ export default function App() {
 
   // Check for shared analysis in URL on mount
   useEffect(() => {
-    try {
-      const params = new URLSearchParams(window.location.search);
-      const shared = params.get("data");
-      if (shared) {
-        const decoded = JSON.parse(atob(shared));
-        if (decoded.dilemma) engine.setDilemma(decoded.dilemma);
-        if (decoded.data) engine.setResult(decoded.data);
-        // Clean URL
-        window.history.replaceState({}, "", window.location.pathname);
+    const fetchSharedData = async () => {
+      try {
+        const params = new URLSearchParams(window.location.search);
+
+        const isPrintMode = params.get("print_mode") === "true";
+        if (isPrintMode) setPrintMode(true);
+
+        // 1. Check for new DB-backed share ID
+        const shareId = params.get("id");
+        if (shareId) {
+          try {
+            const sharedData = await getSharedAnalysis(shareId);
+            if (sharedData.dilemma) engine.setDilemma(sharedData.dilemma);
+            if (sharedData.data) engine.setResult(sharedData.data);
+            if (!isPrintMode) {
+              window.history.replaceState({}, "", window.location.pathname);
+            }
+            return; // Success, exit
+          } catch (e) {
+            console.error("Failed to load shared analysis from DB:", e);
+            if (!isPrintMode) {
+              setToast("Failed to load shared analysis. Link may be invalid or expired.");
+            }
+          }
+        }
+
+        // 2. Fallback for legacy LZString links
+        const sharedDataHash = params.get("data");
+        if (sharedDataHash) {
+          let decodedStr;
+          try {
+            decodedStr = LZString.decompressFromEncodedURIComponent(sharedDataHash);
+            if (!decodedStr) throw new Error("LZString decompressed to null, falling back to base64");
+          } catch {
+            decodedStr = atob(sharedDataHash); // fallback for old links
+          }
+
+          const decoded = JSON.parse(decodedStr);
+          if (decoded.dilemma) engine.setDilemma(decoded.dilemma);
+          if (decoded.data) engine.setResult(decoded.data);
+
+          window.history.replaceState({}, "", window.location.pathname);
+        }
+      } catch (err) {
+        // ignore corrupted share links
+        console.error("Error processing shared URL:", err);
       }
-    } catch {
-      // ignore corrupted share links
-    }
+    };
+
+    fetchSharedData();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
@@ -74,25 +127,52 @@ export default function App() {
     setShowHistory(false);
   };
 
-  const handleShare = useCallback(() => {
+  const handleShare = useCallback(async () => {
     try {
-      const payload = {
-        dilemma: engine.dilemma,
-        data: engine.result,
-      };
-      const encoded = btoa(JSON.stringify(payload));
-      const url = `${window.location.origin}${window.location.pathname}?data=${encoded}`;
-      navigator.clipboard.writeText(url);
+      if (!engine.result) return;
+
+      const response = await createShareLink(engine.dilemma, engine.result);
+      const url = `${window.location.origin}${window.location.pathname}?id=${response.id}`;
+
+      await navigator.clipboard.writeText(url);
       setToast("Share link copied to clipboard!");
-    } catch {
+    } catch (e) {
+      console.error("Share failed:", e);
       setToast("Failed to generate share link");
     }
   }, [engine.dilemma, engine.result]);
 
-  const handleExportPDF = useCallback(() => {
-    setToast("Opening print dialog. Please select 'Save as PDF'.");
-    setTimeout(() => window.print(), 100);
-  }, []);
+  const handleExportPDF = useCallback(async () => {
+    if (!engine.result) {
+      setToast("No analysis to export.");
+      return;
+    }
+    setToast("Capturing full document and charts natively... Please wait.");
+    try {
+      const shareData = await createShareLink(engine.dilemma, engine.result);
+      const shareId = shareData.id;
+
+      const baseUrl = process.env.NEXT_PUBLIC_API_URL || process.env.VITE_API_URL || "http://localhost:8000";
+      window.location.href = `${baseUrl}/api/export/${shareId}`;
+
+    } catch (e) {
+      console.error("PDF generation failed:", e);
+      setToast("PDF generation failed. Please try again.");
+    }
+  }, [engine.result, engine.dilemma]);
+
+  if (printMode) {
+    return (
+      <div className="pdf-export" style={{ background: '#0a0a08', minHeight: '100vh', padding: '40px' }}>
+        <OutputPanel
+          loading={engine.loading}
+          result={engine.result}
+          error={engine.error}
+          dilemma={engine.dilemma}
+        />
+      </div>
+    );
+  }
 
   return (
     <div className="app">
@@ -104,7 +184,13 @@ export default function App() {
       />
 
       <div className="main" style={{ display: compareMode ? "block" : "none" }}>
-        <ComparePanel saveAnalysis={saveAnalysis} restoreData={compareRestoreData} />
+        <ComparePanel
+          saveAnalysis={saveAnalysis}
+          restoreData={compareRestoreData}
+          age={engine.age}
+          riskProfile={engine.riskProfile}
+          timeHorizon={engine.timeHorizon}
+        />
       </div>
 
       <div className="main" style={{ display: !compareMode ? "block" : "none" }}>
@@ -117,8 +203,21 @@ export default function App() {
           uploading={engine.uploading} onFileUpload={engine.handleFileUpload}
           apiKey={engine.apiKey} setApiKey={engine.setApiKey}
           loading={engine.loading}
+          hasResult={!!engine.result}
           onAnalyze={engine.handleAnalyze}
         />
+
+        {/* Global Action Buttons */}
+        {engine.result && !engine.loading && (
+          <div className="result-actions global-actions">
+            <button className="result-action-btn" onClick={handleExportPDF} title="Export as PDF">
+              📄 Export PDF
+            </button>
+            <button className="result-action-btn" onClick={handleShare} title="Share Analysis">
+              🔗 Share
+            </button>
+          </div>
+        )}
         <div ref={resultsRef}>
           <OutputPanel
             loading={engine.loading}
@@ -130,9 +229,6 @@ export default function App() {
             onShare={handleShare}
             onExportPDF={handleExportPDF}
           />
-        </div>
-        <div className="print-only">
-          <PrintTemplate data={engine.result} dilemma={engine.dilemma} />
         </div>
       </div>
 
@@ -150,12 +246,23 @@ export default function App() {
 
       {toast && <Toast message={toast} onClose={() => setToast(null)} />}
 
-      <footer className="app-footer">
-        <div className="footer-content">
-          {/* <span>&copy; {new Date().getFullYear()} Decision Engine. All rights reserved.</span> */}
-          {/* <span className="footer-separator">•</span> */}
-          <span className="footer-credits">
+      <button
+        className={`scroll-top-btn ${showScrollTop ? 'visible' : ''}`}
+        onClick={scrollToTop}
+        title="Scroll to top"
+      >
+        ↑
+      </button>
 
+      <footer className="app-footer">
+        <div className="footer-content" style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '6px' }}>
+          <span style={{ fontSize: '12px', color: 'var(--text-dim)', letterSpacing: '0.02em', fontWeight: 600 }}>
+            © 2026 Decision Engine. All Rights Reserved.
+          </span>
+          <span style={{ fontSize: '13px', color: 'var(--text-dim)', letterSpacing: '0.01em', textAlign: 'center', maxWidth: '900px', padding: '0 10px' }}>
+            Built for precision, clarity, and rigorous strategic reasoning. Designed to minimize cognitive bias and optimize outcomes.
+          </span>
+          <span className="footer-credits">
             <a href="https://www.linkedin.com/in/dharshansondi/" target="_blank" rel="noopener noreferrer" className="footer-link">
               <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="linkedin-icon">
                 <path d="M19 0h-14c-2.761 0-5 2.239-5 5v14c0 2.761 2.239 5 5 5h14c2.762 0 5-2.239 5-5v-14c0-2.761-2.238-5-5-5zm-11 19h-3v-11h3v11zm-1.5-12.268c-.966 0-1.75-.79-1.75-1.764s.784-1.764 1.75-1.764 1.75.79 1.75 1.764-.783 1.764-1.75 1.764zm13.5 12.268h-3v-5.604c0-3.368-4-3.113-4 0v5.604h-3v-11h3v1.765c1.396-2.586 7-2.777 7 2.476v6.759z" />

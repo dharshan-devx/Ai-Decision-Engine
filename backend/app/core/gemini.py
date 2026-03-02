@@ -1,6 +1,8 @@
 import json
+import asyncio
 from google import genai
 from app.core.config import get_settings
+from app.core.ai_status import ai_status
 
 SYSTEM_PROMPT = """You are a world-class strategic advisor — part McKinsey consultant, part Nassim Taleb, part YC partner.
 You transform life and career dilemmas into rigorous strategic frameworks with probabilistic reasoning.
@@ -154,32 +156,36 @@ def repair_json(raw: str) -> dict:
     except json.JSONDecodeError:
         pass
 
-    # Strategy 3: auto-close open structures
+    # Strategy 3: auto-close open structures using a stack
     def close_json(s: str) -> str:
-        s = s.rstrip().rstrip(",")
+        s = s.strip()
+        import re
+        s = re.sub(r',+$', '', s)
+        
         quote_count = s.count('"') - s.count('\\"')
         if quote_count % 2 != 0:
             s += '"'
-        braces = brackets = 0
+            
+        stack = []
         in_str = False
         for i, c in enumerate(s):
             if c == '"' and (i == 0 or s[i - 1] != "\\"):
                 in_str = not in_str
             if not in_str:
                 if c == "{":
-                    braces += 1
-                elif c == "}":
-                    braces -= 1
+                    stack.append("}")
                 elif c == "[":
-                    brackets += 1
-                elif c == "]":
-                    brackets -= 1
-        while brackets > 0:
-            s += "]"
-            brackets -= 1
-        while braces > 0:
-            s += "}"
-            braces -= 1
+                    stack.append("]")
+                elif c == "}" and stack and stack[-1] == "}":
+                    stack.pop()
+                elif c == "]" and stack and stack[-1] == "]":
+                    stack.pop()
+                    
+        s = re.sub(r'"[^"]+"\s*:\s*$', 'null', s)
+        
+        while stack:
+            s += stack.pop()
+            
         return s
 
     try:
@@ -195,9 +201,11 @@ def repair_json(raw: str) -> dict:
     raise ValueError("Could not parse or repair AI response JSON")
 
 
-import asyncio
-
 async def run_analysis(dilemma: str, age: str, risk_profile: str, time_horizon: str, context: str = "", api_key: str = None) -> dict:
+    if not api_key and not ai_status.can_attempt_request():
+        r = ai_status.get_retry_remaining_seconds()
+        raise Exception(f"429 RESOURCE_EXHAUSTED: AI quota exceeded. Try again in {r // 3600}h {(r % 3600) // 60}m.")
+
     settings = get_settings()
     client_key = api_key if api_key else settings.gemini_api_key
     client = genai.Client(api_key=client_key)
@@ -218,28 +226,51 @@ async def run_analysis(dilemma: str, age: str, risk_profile: str, time_horizon: 
         )
         return res.text
 
-    optimist_text, risk_text = await asyncio.gather(
-        run_agent(AGENT_A_PROMPT),
-        run_agent(AGENT_B_PROMPT)
-    )
+    try:
+        optimist_text, risk_text = await asyncio.gather(
+            run_agent(AGENT_A_PROMPT),
+            run_agent(AGENT_B_PROMPT)
+        )
 
-    # Run Agent C (Synthesizer)
-    synth_prompt = build_synthesizer_prompt(base_prompt, optimist_text, risk_text)
-    
-    response = await asyncio.to_thread(
-        client.models.generate_content,
-        model="gemini-2.5-flash",
-        contents=synth_prompt,
-        config=genai.types.GenerateContentConfig(
-            system_instruction=SYNTHESIZER_PROMPT,
-            max_output_tokens=8000,
-            temperature=0.7,
-            response_mime_type="application/json",
-        ),
-    )
+        # Run Agent C (Synthesizer)
+        synth_prompt = build_synthesizer_prompt(base_prompt, optimist_text, risk_text)
+        
+        response = await asyncio.to_thread(
+            client.models.generate_content,
+            model="gemini-2.5-flash",
+            contents=synth_prompt,
+            config=genai.types.GenerateContentConfig(
+                system_instruction=SYNTHESIZER_PROMPT,
+                max_output_tokens=8000,
+                temperature=0.7,
+                response_mime_type="application/json",
+            ),
+        )
 
-    raw = response.text
-    return repair_json(raw)
+        raw = response.text
+        result = repair_json(raw)
+
+        # Only report success for server-key requests (not custom keys)
+        if not api_key:
+            ai_status.report_success()
+
+        return result
+
+    except Exception as e:
+        # Only report errors for server-key requests
+        if not api_key:
+            retry_delay = None
+            err_str = str(e).lower()
+            if "retrydelay" in err_str or "retry_delay" in err_str or "retry-after" in err_str:
+                import re
+                match = re.search(r'(?:retrydelay|retry_delay|retry-after).*?([0-9.]+)', err_str)
+                if match:
+                    try:
+                        retry_delay = int(float(match.group(1)))
+                    except Exception:
+                        pass
+            ai_status.report_error(e, retry_delay_seconds=retry_delay)
+        raise
 
 
 FOLLOWUP_SYSTEM_PROMPT = """You are a world-class strategic advisor.
@@ -249,6 +280,10 @@ Respond in clear, analytical prose (no JSON, no fluff)."""
 
 async def run_followup(dilemma: str, context_summary: str, question: str, api_key: str = None) -> str:
     """Handle follow-up questions using existing analysis context."""
+    if not api_key and not ai_status.can_attempt_request():
+        r = ai_status.get_retry_remaining_seconds()
+        raise Exception(f"429 RESOURCE_EXHAUSTED: AI quota exceeded. Try again in {r // 3600}h {(r % 3600) // 60}m.")
+
     settings = get_settings()
     client_key = api_key if api_key else settings.gemini_api_key
     client = genai.Client(api_key=client_key)
@@ -266,56 +301,35 @@ The user now asks a follow-up question:
 Provide a concise, strategic answer (2-4 paragraphs). Stay rigorous and analytical.
 Do NOT return JSON — respond in clear prose."""
 
-    response = await client.aio.models.generate_content(
-        model="gemini-2.5-flash",
-        contents=followup_prompt,
-        config=genai.types.GenerateContentConfig(
-            system_instruction=FOLLOWUP_SYSTEM_PROMPT,
-            max_output_tokens=2000,
-            temperature=0.7,
-        ),
-    )
-
-    return response.text.strip()
-
-import time
-
-_last_health_status = "active"
-_last_health_check_time = 0
-
-async def check_api_health(api_key: str = None) -> str:
-    """Check if the Gemini API is reachable and has credits, caching the result for 60 seconds."""
-    global _last_health_status, _last_health_check_time
-    
-    current_time = time.time()
-    if current_time - _last_health_check_time < 60:
-        return _last_health_status
-
-    settings = get_settings()
-    client_key = api_key if api_key else settings.gemini_api_key
-    
-    # If no key is set at all, we consider it offline
-    if not client_key or client_key.strip() == "":
-        _last_health_status = "offline"
-        _last_health_check_time = current_time
-        return "offline"
-
-    client = genai.Client(api_key=client_key)
     try:
-        # Minimal request to test quota/connectivity
-        await client.aio.models.generate_content(
+        response = await client.aio.models.generate_content(
             model="gemini-2.5-flash",
-            contents="test",
-            config=genai.types.GenerateContentConfig(max_output_tokens=5)
+            contents=followup_prompt,
+            config=genai.types.GenerateContentConfig(
+                system_instruction=FOLLOWUP_SYSTEM_PROMPT,
+                max_output_tokens=2000,
+                temperature=0.7,
+            ),
         )
-        _last_health_status = "active"
+
+        # Only report success for server-key requests
+        if not api_key:
+            ai_status.report_success()
+
+        return response.text.strip()
+
     except Exception as e:
-        err_msg = str(e).lower()
-        print(f"API Health Check Failed: {repr(e)}")
-        if "429" in err_msg or "quota" in err_msg or "exhausted" in err_msg:
-            _last_health_status = "quota_exceeded"
-        else:
-            _last_health_status = "offline"
-        
-    _last_health_check_time = current_time
-    return _last_health_status
+        if not api_key:
+            retry_delay = None
+            err_str = str(e).lower()
+            if "retrydelay" in err_str or "retry_delay" in err_str or "retry-after" in err_str:
+                import re
+                match = re.search(r'(?:retrydelay|retry_delay|retry-after).*?([0-9.]+)', err_str)
+                if match:
+                    try:
+                        retry_delay = int(float(match.group(1)))
+                    except Exception:
+                        pass
+            ai_status.report_error(e, retry_delay_seconds=retry_delay)
+        raise
+

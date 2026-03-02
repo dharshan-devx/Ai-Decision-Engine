@@ -1,4 +1,6 @@
 "use client";
+import HelpIcon from "./HelpIcon";
+
 const EXAMPLES = [
   "Should I quit my job at a stable tech company to pursue a B2B SaaS startup in the HR space?",
   "Should I order a large pepperoni pizza for myself at 2 AM even though I'm supposed to be on a diet, or just eat sad carrots?",
@@ -13,13 +15,13 @@ export default function InputPanel({
   context, setContext,
   uploading, onFileUpload,
   apiKey, setApiKey,
-  loading, onAnalyze,
+  loading, hasResult, onAnalyze,
 }) {
   return (
     <div className="input-panel">
-      <div className="panel-title">
+      <div className="panel-title" style={{ display: 'flex', alignItems: 'center' }}>
         Decision Input
-        <span className="tooltip-icon" data-tooltip="State the problem clearly. Include any relevant background, constraints, or ultimate goals you are trying to achieve.">?</span>
+        <HelpIcon tooltip="Your specific choice or problem. This sets the boundary for the entire analysis." />
       </div>
 
       <div className="dilemma-area">
@@ -36,9 +38,9 @@ export default function InputPanel({
 
       <div className="context-fields">
         <div>
-          <div className="field-label" style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+          <div className="field-label" style={{ display: 'flex', alignItems: 'center' }}>
             Age (optional)
-            <span className="tooltip-icon" data-tooltip="Used to factor in life-stage impacts on risk tolerance and timeline.">?</span>
+            <HelpIcon tooltip="Your current age calibrates the AI's risk and timeline recommendations." />
           </div>
           <input
             className="field-input"
@@ -49,9 +51,9 @@ export default function InputPanel({
           />
         </div>
         <div>
-          <div className="field-label" style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+          <div className="field-label" style={{ display: 'flex', alignItems: 'center' }}>
             Risk Profile
-            <span className="tooltip-icon" data-tooltip="Conservative: Prefers safety. Moderate: Balanced. Aggressive: High risk tolerance. Contrarian: Against the grain.">?</span>
+            <HelpIcon tooltip="Your tolerance for failure filters out overly conservative or recklessly aggressive paths based on your comfort." />
           </div>
           <select className="field-select" value={riskProfile} onChange={(e) => setRiskProfile(e.target.value)}>
             <option value="conservative">Conservative</option>
@@ -61,9 +63,9 @@ export default function InputPanel({
           </select>
         </div>
         <div>
-          <div className="field-label" style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+          <div className="field-label" style={{ display: 'flex', alignItems: 'center' }}>
             Time Horizon
-            <span className="tooltip-icon" data-tooltip="How far out you are looking for this decision's impact to play out.">?</span>
+            <HelpIcon tooltip="The relevancy timeframe prioritizes immediate vs delayed outcomes." />
           </div>
           <select className="field-select" value={timeHorizon} onChange={(e) => setTimeHorizon(e.target.value)}>
             <option value="short-term">Short-term (1–2 yr)</option>
@@ -72,9 +74,16 @@ export default function InputPanel({
           </select>
         </div>
         <div style={{ gridColumn: "1 / -1" }}>
-          <div className="field-label" style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+          <div className="field-label" style={{ display: 'flex', alignItems: 'center' }}>
             Custom Gemini API Key (Optional)
-            <span className="tooltip-icon" data-tooltip="Bring your own API key if you hit rate limits.">?</span>
+            <HelpIcon tooltip="Bring your own API key to bypass shared server rate limits and route heavy analysis directly through your private quota." />
+            <div style={{ marginLeft: 'auto', display: 'flex', alignItems: 'center', gap: '8px' }}>
+              <span style={{ color: 'var(--green)', fontSize: '9px', textTransform: 'uppercase', letterSpacing: '0.05em', border: '1px solid var(--green-dim)', padding: '2px 6px', borderRadius: '4px', background: 'var(--surface2)' }}>Bypasses Global Limits</span>
+              <a href="https://aistudio.google.com/api-keys" target="_blank" rel="noopener noreferrer" style={{ display: 'flex', alignItems: 'center', gap: '4px', color: 'var(--accent)', fontSize: '11px', textDecoration: 'none', background: 'var(--surface2)', padding: '3px 8px', borderRadius: '4px', border: '1px solid var(--border)' }}>
+                Get Key
+                <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path><polyline points="15 3 21 3 21 9"></polyline><line x1="10" y1="14" x2="21" y2="3"></line></svg>
+              </a>
+            </div>
           </div>
           <input
             className="field-input"
@@ -94,7 +103,7 @@ export default function InputPanel({
         {loading ? "Analyzing…" : "Run Strategic Analysis"}
       </button>
 
-      {!loading && (
+      {!loading && !hasResult && (
         <>
           <div className="divider" />
           <div>

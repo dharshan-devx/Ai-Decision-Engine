@@ -4,6 +4,7 @@ import SkillRadar from "./charts/SkillRadar";
 import RiskSection from "./sections/RiskSection";
 import PathsSection from "./sections/PathsSection";
 import DecisionTree from "./DecisionTree";
+import HelpIcon from "./HelpIcon";
 import {
   ProbabilisticSection,
   RecommendationsSection,
@@ -99,6 +100,7 @@ export default function Results({ data, dilemma }) {
               <div className="section-header">
                 <span className="section-num">01</span>
                 <span className="section-title">Problem Framing</span>
+                <HelpIcon small tooltip="The core decision and its underlying assumptions." />
               </div>
               <div className="card">
                 <div className="card-label">Hidden Assumptions</div>
@@ -118,6 +120,7 @@ export default function Results({ data, dilemma }) {
               <div className="section-header">
                 <span className="section-num">02</span>
                 <span className="section-title">Constraints</span>
+                <HelpIcon small tooltip="The hard limits and non-negotiables bounding this decision." />
               </div>
               <div className="cards-grid">
                 {Object.entries(constraints).map(([k, v]) => (
@@ -139,6 +142,7 @@ export default function Results({ data, dilemma }) {
               <div className="section-header">
                 <span className="section-num">04</span>
                 <span className="section-title">Opportunity Cost</span>
+                <HelpIcon small tooltip="The value of the alternative paths you give up by making a choice." />
               </div>
               <div className="cards-grid">
                 {Object.entries(opportunityCost).map(([k, v]) => (
@@ -157,6 +161,7 @@ export default function Results({ data, dilemma }) {
               <div className="section-header">
                 <span className="section-num">05</span>
                 <span className="section-title">Skill Delta Analysis</span>
+                <HelpIcon small tooltip="The gap between your current capabilities and the skills required for success." />
               </div>
               <div className="two-col">
                 <div className="card">
@@ -209,6 +214,7 @@ export default function Results({ data, dilemma }) {
                 <div className="section-header">
                   <span className="section-num">11</span>
                   <span className="section-title">Regret Minimization</span>
+                  <HelpIcon small tooltip="Evaluates the decision from the perspective of your 80-year-old self to minimize future regret." />
                 </div>
                 <div className="card" style={{ display: "flex", flexDirection: "column", gap: 14 }}>
                   <div>

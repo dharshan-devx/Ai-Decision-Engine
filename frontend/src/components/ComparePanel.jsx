@@ -1,14 +1,17 @@
 "use client";
 import { useState, useEffect } from "react";
 import { analyzeDecision } from "../lib/api";
+import OutputPanel from "./OutputPanel";
+import HelpIcon from "./HelpIcon";
 
-export default function ComparePanel({ saveAnalysis, restoreData }) {
+export default function ComparePanel({ saveAnalysis, restoreData, age, riskProfile, timeHorizon }) {
     const [dilemmaA, setDilemmaA] = useState("");
     const [dilemmaB, setDilemmaB] = useState("");
     const [resultA, setResultA] = useState(null);
     const [resultB, setResultB] = useState(null);
     const [loadingA, setLoadingA] = useState(false);
     const [loadingB, setLoadingB] = useState(false);
+    const [apiKey, setApiKey] = useState("");
     const [error, setError] = useState(null);
     const [comparisonSaved, setComparisonSaved] = useState(false);
 
@@ -36,9 +39,9 @@ export default function ComparePanel({ saveAnalysis, restoreData }) {
             if (saveAnalysis) {
                 saveAnalysis({
                     dilemma: unifiedDilemma,
-                    age: "",
-                    riskProfile: "moderate",
-                    timeHorizon: "medium-term",
+                    age: age || "",
+                    riskProfile: riskProfile || "moderate",
+                    timeHorizon: timeHorizon || "medium-term",
                     data: combinedData
                 });
                 setComparisonSaved(true);
@@ -55,7 +58,13 @@ export default function ComparePanel({ saveAnalysis, restoreData }) {
         setLoading(true);
         setError(null);
         try {
-            const res = await analyzeDecision({ dilemma, age: "", riskProfile: "moderate", timeHorizon: "medium-term" });
+            const res = await analyzeDecision({
+                dilemma,
+                age: age || "",
+                riskProfile: riskProfile || "moderate",
+                timeHorizon: timeHorizon || "medium-term",
+                apiKey
+            });
             setResult(res);
         } catch (e) {
             setError(e?.response?.data?.detail || e.message || "Analysis failed");
@@ -133,12 +142,36 @@ export default function ComparePanel({ saveAnalysis, restoreData }) {
 
     return (
         <div className="compare-container">
+            <div className="compare-header-row" style={{ marginBottom: 20 }}>
+                <div className="form-field">
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 4 }}>
+                        <label className="field-label" style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                            Custom Gemini API Key (Optional)
+                            <HelpIcon tooltip="Bring your own API key to bypass shared server rate limits and route heavy analysis directly through your private quota." />
+                        </label>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                            <span style={{ color: 'var(--green)', fontSize: '9px', textTransform: 'uppercase', letterSpacing: '0.05em', border: '1px solid var(--green-dim)', padding: '2px 6px', borderRadius: '4px', background: 'var(--surface2)' }}>Bypasses Global Limits</span>
+                            <a href="https://aistudio.google.com/api-keys" target="_blank" rel="noopener noreferrer" style={{ display: 'flex', alignItems: 'center', gap: '4px', color: 'var(--accent)', fontSize: '11px', textDecoration: 'none', background: 'var(--surface2)', padding: '3px 8px', borderRadius: '4px', border: '1px solid var(--border)' }}>
+                                Get Key
+                                <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path><polyline points="15 3 21 3 21 9"></polyline><line x1="10" y1="14" x2="21" y2="3"></line></svg>
+                            </a>
+                        </div>
+                    </div>
+                    <input
+                        className="field-input"
+                        type="password"
+                        placeholder="AIzA..."
+                        value={apiKey}
+                        onChange={(e) => setApiKey(e.target.value)}
+                    />
+                </div>
+            </div>
             <div className="compare-grid">
                 {/* Side A */}
                 <div className="compare-side">
-                    <div className="compare-side-label">
+                    <div className="compare-side-label" style={{ display: 'flex', alignItems: 'center' }}>
                         Decision A
-                        <span className="tooltip-icon" title="Describe the first option or path you are considering.">?</span>
+                        <HelpIcon tooltip="The exact first option you are considering. Evaluated holistically head-to-head against Decision B." />
                     </div>
                     <textarea
                         className="compare-textarea"
@@ -147,12 +180,14 @@ export default function ComparePanel({ saveAnalysis, restoreData }) {
                         onChange={(e) => setDilemmaA(e.target.value)}
                         rows={3}
                     />
+
                     <button
-                        className="compare-run-btn"
+                        className="analyze-btn"
                         onClick={() => runAnalysis("A")}
                         disabled={!dilemmaA.trim() || loadingA}
+                        style={{ marginTop: 12 }}
                     >
-                        {loadingA ? "Analyzing…" : "Analyze A"}
+                        {loadingA ? "Analyzing…" : "⚡ Analyze A"}
                     </button>
                     {loadingA && <div className="compare-loading"><div className="spinner" />Analyzing...</div>}
                     {renderCompactResult(resultA)}
@@ -165,9 +200,9 @@ export default function ComparePanel({ saveAnalysis, restoreData }) {
 
                 {/* Side B */}
                 <div className="compare-side">
-                    <div className="compare-side-label">
+                    <div className="compare-side-label" style={{ display: 'flex', alignItems: 'center' }}>
                         Decision B
-                        <span className="tooltip-icon" title="Describe the alternative option or path you are considering.">?</span>
+                        <HelpIcon tooltip="The primary alternative route. Systematically compared to finding the objectively superior choice." />
                     </div>
                     <textarea
                         className="compare-textarea"
@@ -177,11 +212,12 @@ export default function ComparePanel({ saveAnalysis, restoreData }) {
                         rows={3}
                     />
                     <button
-                        className="compare-run-btn"
+                        className="analyze-btn"
                         onClick={() => runAnalysis("B")}
                         disabled={!dilemmaB.trim() || loadingB}
+                        style={{ marginTop: 12 }}
                     >
-                        {loadingB ? "Analyzing…" : "Analyze B"}
+                        {loadingB ? "Analyzing…" : "⚡ Analyze B"}
                     </button>
                     {loadingB && <div className="compare-loading"><div className="spinner" />Analyzing...</div>}
                     {renderCompactResult(resultB)}

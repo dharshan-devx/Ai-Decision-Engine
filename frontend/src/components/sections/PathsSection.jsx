@@ -1,5 +1,6 @@
 "use client";
 import { useState } from "react";
+import HelpIcon from "../HelpIcon";
 import PathComparisonChart from "../charts/PathComparisonChart";
 
 function PathCard({ path, index }) {
@@ -68,6 +69,7 @@ export default function PathsSection({ strategicPaths }) {
       <div className="section-header">
         <span className="section-num">06</span>
         <span className="section-title">Strategic Paths</span>
+        <HelpIcon small tooltip="A systematic comparison of potential choices, modeling best and worst-case scenarios." />
       </div>
       <div className="paths-container">
         {strategicPaths.map((p, i) => <PathCard key={i} path={p} index={i} />)}

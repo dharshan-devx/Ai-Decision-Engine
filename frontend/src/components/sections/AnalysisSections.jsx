@@ -1,4 +1,5 @@
 "use client";
+import HelpIcon from "../HelpIcon";
 export function ProbabilisticSection({ probabilisticModel }) {
   if (!probabilisticModel) return null;
   return (
@@ -6,6 +7,7 @@ export function ProbabilisticSection({ probabilisticModel }) {
       <div className="section-header">
         <span className="section-num">07</span>
         <span className="section-title">Probabilistic Outcomes</span>
+        <HelpIcon small tooltip="The estimated likelihood of various outcomes across different time horizons." />
       </div>
       <div className="prob-grid">
         {Object.values(probabilisticModel).map((p, i) => (
@@ -34,6 +36,7 @@ export function RecommendationsSection({ recommendations }) {
       <div className="section-header">
         <span className="section-num">08</span>
         <span className="section-title">Recommendation Engine</span>
+        <HelpIcon small tooltip="Algorithmic conclusions synthesized into distinct strategic recommendations." />
       </div>
       <div className="recommendations-grid">
         {Object.entries(recommendations).map(([k, v]) => (
@@ -55,6 +58,7 @@ export function BiasSection({ biasDetection }) {
       <div className="section-header">
         <span className="section-num">09</span>
         <span className="section-title">Cognitive Bias Detection</span>
+        <HelpIcon small tooltip="Identifies potential cognitive blind spots and provides mitigation strategies." />
       </div>
       <div className="bias-list">
         {biasDetection.map((b, i) => (
@@ -76,6 +80,7 @@ export function AntifragilitySection({ antifragilityScore }) {
       <div className="section-header">
         <span className="section-num">10</span>
         <span className="section-title">Antifragility Score</span>
+        <HelpIcon small tooltip="Measures how much you stand to gain from volatility, disorder, and uncertainty." />
       </div>
       <div className="antifragility-score">
         <div>

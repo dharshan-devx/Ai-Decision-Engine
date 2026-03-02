@@ -114,6 +114,8 @@ export default function DecisionTree({ data }) {
                 onNodesChange={onNodesChange}
                 onEdgesChange={onEdgesChange}
                 fitView
+                minZoom={0.1}
+                maxZoom={2}
                 attributionPosition="bottom-right"
                 proOptions={{ hideAttribution: true }}
             >
