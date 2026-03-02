@@ -2912,6 +2912,9 @@ input[type="number"] {
   .history-panel,
   .app-footer,
   .print-hide,
+  .toast,
+  .result-actions,
+  .scroll-top-btn,
   .compare-panel {
     display: none !important;
   }
@@ -2921,6 +2924,30 @@ input[type="number"] {
     margin: 0 !important;
     gap: 0 !important;
     max-width: none !important;
+    display: block !important;
+  }
+
+  .card,
+  .prob-card,
+  .risk-card,
+  .chart-container,
+  .rec-card,
+  .path-card,
+  .bias-item,
+  .antifragility-score {
+    page-break-inside: avoid;
+    break-inside: avoid;
+    margin-bottom: 24px !important;
+  }
+
+  .cards-grid,
+  .two-col,
+  .skill-col,
+  .prob-grid,
+  .risk-grid,
+  .recommendations-grid {
+    display: block !important;
+    width: 100% !important;
   }
 
   * {
