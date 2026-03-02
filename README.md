@@ -7,6 +7,12 @@ An advanced multi-agent AI framework engineered to structure complex life and st
 
 ---
 
+![Decision Engine Preview](https://via.placeholder.com/800x400.png?text=AI+Decision+Engine+Screenshot) *(Imagine a beautiful glassmorphism dark-themed dashboard here)*
+
+---
+
+---
+
 # 🌍 Live Architecture
 
 Frontend (Next.js) → FastAPI Backend → Gemini AI → Supabase (PostgreSQL) → Playwright PDF Engine
