@@ -131,14 +131,30 @@ export default function App() {
     try {
       if (!engine.result) return;
 
+      setToast("Generating secure share link...");
       const response = await createShareLink(engine.dilemma, engine.result);
       const url = `${window.location.origin}${window.location.pathname}?id=${response.id}`;
+
+      if (navigator.share) {
+        try {
+          await navigator.share({
+            title: "Decision Engine Analysis",
+            text: "Check out this strategic decision analysis.",
+            url: url,
+          });
+          setToast("Successfully shared!");
+          return;
+        } catch (shareError) {
+          // If user cancels the share sheet, it throws an error. Just fall back to clipboard just in case.
+          console.log("Share API closed or failed, falling back to clipboard");
+        }
+      }
 
       await navigator.clipboard.writeText(url);
       setToast("Share link copied to clipboard!");
     } catch (e) {
       console.error("Share failed:", e);
-      setToast("Failed to generate share link");
+      setToast("Failed to generate share link. It might be blocked by your browser.");
     }
   }, [engine.dilemma, engine.result]);
 
