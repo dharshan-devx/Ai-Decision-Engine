@@ -1,112 +1,356 @@
 # 🧠 AI Decision Engine
 
-An extremely powerful, multi-agent AI framework designed to maximize strategic reasoning, evaluate risk, eliminate cognitive bias, and discover hidden opportunities for tough life and professional choices.
+An advanced multi-agent AI framework engineered to structure complex life and strategic decisions using quantified risk modeling, regret minimization, and structured synthesis.
 
-![Decision Engine Preview](https://via.placeholder.com/800x400.png?text=AI+Decision+Engine+Screenshot) *(Imagine a beautiful glassmorphism dark-themed dashboard here)*
+> This is not a wrapper around an LLM.  
+> This is a structured cognitive architecture.
 
-## 🌟 About the Project
+---
 
-We all face hard choices. *Should I quit my job? Should I learn this new framework? Should I launch a startup?* The **AI Decision Engine** removes the paralyzing fear of the unknown by breaking down your dilemmas using a rigorous, multi-faceted analytical model modeled after McKinsey consultants, venture capitalists, and risk strategists.
+# 🌍 Live Architecture
 
-### 🤖 Why This Project? vs Standard LLMs (like ChatGPT)
+Frontend (Next.js) → FastAPI Backend → Gemini AI → Supabase (PostgreSQL) → Playwright PDF Engine
 
-Normal LLMs: 
-"You should do what makes you happy! But remember to be careful!" 🤷‍♂️ (Vague, fluffy, overly safe)
+---
 
-**AI Decision Engine**: 
-"Path A has a 45% success probability but a catastrophic 'Ruin' risk of 8/10. Path B has severe short-term opportunity costs but maximizes your 10-year Antifragility score." 🗡️ (Rigorous, quantified, strategic)
+# 🎯 Vision
 
-We achieve this using a proprietary **Three-Agent System**:
-*   🏃‍♂️ **Agent A (The Visionary):** Argues fiercely for the maximum upside and optionality.
-*   🛡️ **Agent B (The Risk Manager):** Stress-tests the idea for ruin thresholds and downside exposure.
-*   ⚖️ **Agent C (The Synthesizer):** Consolidates both arguments, detects cognitive biases, and structures the final 11-point multidimensional output.
+Most people make major life decisions emotionally.
 
-## 🚀 How to Open, Start, Run, and Test
+This system forces structured reasoning by:
 
-### Prerequisites
-- Node.js (v18+)
-- Python (v3.10+)
-- Gemini API Key ([Get one here](https://aistudio.google.com/))
-- Supabase Project (for PostgreSQL database)
+- Surfacing hidden assumptions
+- Mapping opportunity costs
+- Quantifying ruin risk
+- Applying regret minimization
+- Modeling long-term antifragility
 
-### Backend (FastAPI / Python)
-1. Navigate to the `backend` folder: `cd backend`
-2. Create and activate a virtual environment:
-   * Windows: `python -m venv venv` and `.\venv\Scripts\activate`
-   * Mac/Linux: `python3 -m venv venv` and `source venv/bin/activate`
-3. Install dependencies: `pip install -r requirements.txt`
-4. Install Playwright binaries for PDF generation: `playwright install chromium --with-deps`
-5. Create a `.env` file based on `.env.example`:
-   ```env
-   GEMINI_API_KEY=your_gemini_api_key
-   SUPABASE_URL=your_supabase_url
-   SUPABASE_KEY=your_supabase_anon_key
-   ALLOWED_ORIGINS=http://localhost:3000
-   ```
-6. Start the server: `uvicorn app.main:app --reload` (Runs on port 8000)
+Designed for founders, engineers, and decision-makers facing high-stakes crossroads.
 
-### Frontend (Next.js / React)
-1. Navigate to the `frontend` folder: `cd frontend`
-2. Install dependencies: `npm install`
-3. Create a `.env.local` file:
-   ```env
-   NEXT_PUBLIC_API_URL=http://localhost:8000
-   ```
-4. Start the development server: `npm run dev` (Runs on port 3000)
-5. Open your browser and go to `http://localhost:3000`!
+---
 
-## 📂 Folder Structure
+# 👨‍💻 About the Creator
+
+Hi, I’m **Dharshan Sondi**.
+
+I built this because I was frustrated with vague AI responses like:
+
+> “Follow your passion.”
+
+I wanted AI that thinks like:
+- A venture capitalist
+- A risk strategist
+- A McKinsey consultant
+- A long-term systems thinker
+
+So I built a three-agent reasoning engine.
+
+---
+
+# 🧠 Three-Agent AI Architecture
+
+| Agent | Role | Responsibility |
+|-------|------|----------------|
+| 🏃 Visionary | Upside Maximizer | Explores leverage, optionality, asymmetry |
+| 🛡 Risk Manager | Downside Protector | Detects ruin risk, fragility, hidden traps |
+| ⚖ Synthesizer | Decision Architect | Consolidates reasoning into structured 11-point framework |
+
+---
+
+# 🏗️ Tech Stack
+
+## Frontend
+
+- Next.js (React 19)
+- Vanilla CSS (Custom Glassmorphism Design System)
+- Recharts (Radar Risk Visualization)
+- React Flow + Dagre (Decision Trees)
+- Lucide React (Icons)
+
+## Backend
+
+- FastAPI (Python 3.10+)
+- Google Gemini SDK (`gemini-2.5-flash`)
+- SQLAlchemy ORM
+- Supabase (PostgreSQL)
+- Playwright (Headless Chromium for PDF Export)
+
+---
+
+# 🔥 Engineering Challenges Solved
+
+## 1️⃣ AI JSON Truncation
+
+### Problem
+LLM responses occasionally truncated mid-output → invalid JSON → server crash.
+
+### Solution
+Built a custom stack-based JSON repair parser:
+
+- Walks backwards
+- Closes dangling quotes
+- Balances `{}` and `[]`
+- Replaces incomplete keys with `null`
+
+Guarantees valid JSON payload to frontend.
+
+---
+
+## 2️⃣ Async + Playwright Event Loop Crash
+
+### Problem
+On Windows + Python 3.14:
+```
+ValueError: I/O operation on closed pipe
+```
+
+### Solution
+
+- Isolated PDF logic
+- Used `sync_playwright()`
+- Wrapped inside `asyncio.to_thread()`
+- Prevented event loop contamination
+
+Stable under concurrency.
+
+---
+
+## 3️⃣ Global Gemini Rate Limiting
+
+### Problem
+Shared API key → quota exhaustion.
+
+### Solution
+
+- Global rate tracking
+- User-level key override
+- Frontend custom API key injection
+
+Prevents full system lockout.
+
+---
+
+## 4️⃣ Zero Layout Shift Tooltips
+
+Standard tooltips caused scroll jumps.
+
+Built viewport-aware, absolute-positioned custom tooltip system.
+
+Zero layout shift guaranteed.
+
+---
+
+# 🗄️ Database Schema
+
+## Table: `analyses`
+
+| Column | Type | Description |
+|--------|------|------------|
+| id | UUID | Primary Key |
+| dilemma | TEXT | User input |
+| created_at | TIMESTAMP | Auto timestamp |
+| result_data | JSONB | Structured 11-point AI output |
+
+---
+
+# 🧩 AI Output Framework (11 Dimensions)
+
+| # | Component |
+|---|-----------|
+| 1 | Hidden Assumptions |
+| 2 | Opportunity Cost Analysis |
+| 3 | Ruin Risk Score |
+| 4 | Expected Value Modeling |
+| 5 | Regret Minimization |
+| 6 | Time Horizon Impact |
+| 7 | Antifragility Index |
+| 8 | Emotional Bias Detection |
+| 9 | Strategic Leverage Points |
+| 10 | Second-Order Consequences |
+| 11 | Final Decision Recommendation |
+
+---
+
+# 📂 Project Structure
 
 ```
 decision-engine/
 │
-├── frontend/                # Next.js React Frontend
+├── frontend/
 │   ├── src/
-│   │   ├── app/             # Application routes & layout
-│   │   ├── components/      # Glassmorphism UI Components (Results, Compare, Inputs)
-│   │   ├── hooks/           # Custom React hooks (useDecisionEngine)
-│   │   ├── lib/             # API clients & utilities
-│   │   └── styles/          # Global CSS & Design System
-│   ├── package.json
-│   └── vercel.json          # Deployment config
+│   │   ├── app/
+│   │   ├── components/
+│   │   ├── hooks/
+│   │   ├── lib/
+│   │   └── styles/
+│   └── vercel.json
 │
-├── backend/                 # FastAPI Python Backend
+├── backend/
 │   ├── app/
-│   │   ├── core/            # AI Prompts, Models, and JSON Repair logic
-│   │   ├── routers/         # API Routes (analysis, share, export)
-│   │   ├── main.py          # FastAPI Entry Point
-│   │   ├── database.py      # Supabase connection
-│   │   └── db_models.py     # SQLAlchemy Data Models
+│   │   ├── core/
+│   │   ├── routers/
+│   │   ├── database.py
+│   │   ├── db_models.py
+│   │   └── main.py
 │   ├── requirements.txt
-│   └── render.yaml          # Deployment config
+│   └── render.yaml
 │
-├── .gitignore
-├── README.md                # You are here!
-└── CodebaseReadme.md        # Technical deep-dive documentation
+└── README.md
 ```
 
-## 🗄️ Database Schema (Supabase / PostgreSQL)
+---
 
-**Table: `analyses`**
-Stores the output of AI generations for persistent sharing and History tracking.
-*   `id` (UUID, Primary Key)
-*   `dilemma` (Text)
-*   `created_at` (Timestamp)
-*   `result_data` (JSONB - Stores the massive 11-point framework payload)
+# 🚀 Local Development Setup
 
-## 🤝 Open to Contribute & Collaborate!
+## Backend
 
-Hi! My name is **Dharshan Sondi**. I passionately built this tool because I believe everyone should have access to elite-level cognitive reasoning when making life-altering choices.
+```bash
+cd backend
+python -m venv venv
+venv\Scripts\activate  # Windows
+source venv/bin/activate  # Mac/Linux
 
-This project is entirely **Open Source**. 
+pip install -r requirements.txt
+playwright install chromium --with-deps
+```
 
-I am incredibly open to collaboration! If you want to:
-*   Add a new AI Provider (Anthropic, OpenAI)
-*   Build a user authentication system
-*   Create a mobile app wrapped version
-*   Find and fix bugs
+Create `.env`:
 
-Feel free to open an Issue or a Pull Request! 
+```
+GEMINI_API_KEY=your_key
+SUPABASE_URL=your_url
+SUPABASE_KEY=your_key
+ALLOWED_ORIGINS=http://localhost:3000
+```
 
-📧 Contact me directly: [dharshansondi.dev@gmail.com](mailto:dharshansondi.dev@gmail.com)
-🔗 LinkedIn: [Dharshan Sondi](https://www.linkedin.com/in/dharshansondi/)
+Run:
+
+```
+uvicorn app.main:app --reload
+```
+
+Backend runs on:
+```
+http://localhost:8000
+```
+
+---
+
+## Frontend
+
+```
+cd frontend
+npm install
+```
+
+Create `.env.local`:
+
+```
+NEXT_PUBLIC_API_URL=http://localhost:8000
+```
+
+Run:
+
+```
+npm run dev
+```
+
+Frontend runs on:
+```
+http://localhost:3000
+```
+
+---
+
+# 🌍 Production Deployment
+
+## Backend → Render
+
+1. Push repo to GitHub
+2. Create Web Service
+3. Root directory: `backend`
+4. Build command:
+
+```
+pip install -r requirements.txt && playwright install chromium
+```
+
+5. Start command:
+
+```
+uvicorn app.main:app --host 0.0.0.0 --port $PORT
+```
+
+6. Add environment variables in Render dashboard:
+
+```
+GEMINI_API_KEY=...
+SUPABASE_URL=...
+SUPABASE_KEY=...
+ALLOWED_ORIGINS=https://your-vercel-domain.vercel.app
+```
+
+---
+
+## Frontend → Vercel
+
+1. Import GitHub repo
+2. Root directory: `frontend`
+3. Add environment variable:
+
+```
+NEXT_PUBLIC_API_URL=https://your-render-backend.onrender.com
+```
+
+Deploy.
+
+---
+
+# 🧪 Production Test Checklist
+
+- Analyze dilemma
+- Confirm request hits Render backend
+- Confirm Gemini processes successfully
+- Confirm Supabase writes record
+- Confirm JSON repair works on long output
+- Confirm PDF export launches Chromium
+
+---
+
+# 🧠 Why This Is Different
+
+Standard LLM:
+> “Do what makes you happy.”
+
+Decision Engine:
+> “Path A has 45% upside probability but 8/10 ruin risk. Path B maximizes long-term antifragility.”
+
+This is structured decision architecture.
+
+---
+
+# 🤝 Open for Collaboration
+
+If you'd like to:
+
+- Add Anthropic/OpenAI support
+- Implement authentication
+- Improve AI workflow
+- Build mobile version
+- Contribute optimizations
+
+Open a PR or Issue.
+
+---
+
+# 📬 Contact
+
+Dharshan Sondi  
+Email: dharshansondi.dev@gmail.com  
+LinkedIn: https://www.linkedin.com/in/dharshansondi/
+
+---
+
+Built with conviction.  
+Engineered for clarity.  
+Designed for high-stakes decisions.
