@@ -43,7 +43,9 @@ async def analyze(request: AnalyzeRequest, req: Request):
         err_str = str(e)
         if "429 RESOURCE_EXHAUSTED" in err_str or "quota" in err_str.lower():
             raise HTTPException(status_code=429, detail="Gemini API free tier quota exceeded. Please try again later (or enter a paid API key).")
-        raise HTTPException(status_code=500, detail=f"Analysis failed: {err_str}")
+        if "API key not valid" in err_str or "400 INVALID_ARGUMENT" in err_str:
+            raise HTTPException(status_code=400, detail="API Key not found or invalid. Please provide a valid Gemini API Key.")
+        raise HTTPException(status_code=400, detail=f"Analysis failed: {err_str}")
 
 
 @router.post("/followup", response_model=FollowUpResponse)
@@ -64,7 +66,9 @@ async def followup(request: FollowUpRequest, req: Request):
         err_str = str(e)
         if "429 RESOURCE_EXHAUSTED" in err_str or "quota" in err_str.lower():
             raise HTTPException(status_code=429, detail="Gemini API free tier quota exceeded. Please try again later.")
-        raise HTTPException(status_code=500, detail=f"Follow-up failed: {err_str}")
+        if "API key not valid" in err_str or "400 INVALID_ARGUMENT" in err_str:
+            raise HTTPException(status_code=400, detail="API Key not found or invalid. Please provide a valid Gemini API Key.")
+        raise HTTPException(status_code=400, detail=f"Follow-up failed: {err_str}")
 
 
 @router.post("/health/reset")
