@@ -163,7 +163,7 @@ export default function Results({ data, dilemma }) {
                 <span className="section-title">Skill Delta Analysis</span>
                 <HelpIcon small tooltip="The gap between your current capabilities and the skills required for success." />
               </div>
-              <div className="two-col">
+              <div className="skill-col">
                 <div className="card">
                   <div className="card-label">Required Skills</div>
                   <div className="tag-row" style={{ marginTop: 8 }}>
