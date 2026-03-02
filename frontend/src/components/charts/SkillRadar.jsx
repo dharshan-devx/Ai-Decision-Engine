@@ -22,7 +22,7 @@ export default function SkillRadar({ skillDelta }) {
     let currentLine = words[0];
 
     for (let i = 1; i < words.length; i++) {
-      if ((currentLine + " " + words[i]).length <= 18) {
+      if ((currentLine + " " + words[i]).length <= 14) {
         currentLine += " " + words[i];
       } else {
         lines.push(currentLine);
@@ -33,10 +33,11 @@ export default function SkillRadar({ skillDelta }) {
       lines.push(currentLine);
     }
 
+    // Offset y slightly upwards based on number of lines to vertically center the text block
     return (
-      <text x={x} y={y} textAnchor={textAnchor} fill="#a8a29e" fontSize={11} fontFamily="Inter">
+      <text x={x} y={y} textAnchor={textAnchor} fill="#a8a29e" fontSize={9} fontFamily="Inter">
         {lines.map((line, index) => (
-          <tspan key={index} x={x} dy={index === 0 ? `-${(lines.length - 1) * 0.4}em` : "1.2em"}>
+          <tspan key={index} x={x} dy={index === 0 ? `-${(lines.length - 1) * 0.5}em` : "1.1em"}>
             {line}
           </tspan>
         ))}
@@ -45,15 +46,15 @@ export default function SkillRadar({ skillDelta }) {
   };
 
   return (
-    <div className="chart-container">
-      <div className="chart-title">Skill Gap Radar</div>
-      <ResponsiveContainer width="100%" height={280}>
-        <RadarChart cx="50%" cy="50%" outerRadius="60%" data={data}>
+    <div className="chart-container" style={{ padding: '24px 12px' }}>
+      <div className="chart-title" style={{ paddingLeft: '12px' }}>Skill Gap Radar</div>
+      <ResponsiveContainer width="100%" height={340}>
+        <RadarChart cx="50%" cy="50%" outerRadius="40%" data={data}>
           <PolarGrid stroke="rgba(255,255,255,0.06)" />
           <PolarAngleAxis dataKey="skill" tick={renderPolarTick} />
           <Radar name="Required" dataKey="required" stroke="#ef4743" fill="#ef4743" fillOpacity={0.08} />
           <Radar name="Current" dataKey="current" stroke="#2cbb5d" fill="#2cbb5d" fillOpacity={0.12} />
-          <Legend wrapperStyle={{ fontSize: 11, fontFamily: "Inter", paddingTop: '20px' }} />
+          <Legend wrapperStyle={{ fontSize: 10, fontFamily: "Inter", paddingTop: '10px' }} />
         </RadarChart>
       </ResponsiveContainer>
     </div>
