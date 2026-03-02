@@ -930,6 +930,12 @@ input[type="number"] {
   gap: 16px;
 }
 
+.skill-col {
+  display: grid;
+  grid-template-columns: 2fr 3fr;
+  gap: 16px;
+}
+
 .error-state {
   background: var(--red-dim);
   border: 1px solid rgba(239, 83, 80, 0.25);
@@ -1503,6 +1509,10 @@ input[type="number"] {
   }
 
   .two-col {
+    grid-template-columns: 1fr;
+  }
+
+  .skill-col {
     grid-template-columns: 1fr;
   }
 
