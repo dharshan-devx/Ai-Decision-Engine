@@ -11,6 +11,7 @@ if sys.platform == "win32":
         pass
 
 from fastapi import FastAPI, Request
+from fastapi.responses import RedirectResponse
 from fastapi.middleware.cors import CORSMiddleware
 from app.routers.share import router as share_router
 from app.routers.export import router as export_router
@@ -62,6 +63,18 @@ async def log_requests(request: Request, call_next):
 app.include_router(api_router, prefix="/api")
 app.include_router(share_router, prefix="/api")
 app.include_router(export_router, prefix="/api")
+
+@app.get("/")
+async def root():
+    return RedirectResponse(url="/api/docs")
+
+@app.get("/health")
+async def health_root():
+    return RedirectResponse(url="/api/health")
+
+@app.get("/docs", include_in_schema=False)
+async def docs_redirect():
+    return RedirectResponse(url="/api/docs")
 
 @app.on_event("startup")
 async def startup():
