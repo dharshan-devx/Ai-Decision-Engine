@@ -2,7 +2,7 @@ services:
   - type: web
     name: decision-engine-backend
     runtime: python
-    buildCommand: "pip install -r requirements.txt && export PLAYWRIGHT_BROWSERS_PATH=0 && playwright install chromium --with-deps"
+    buildCommand: "pip install -r requirements.txt && playwright install chromium --with-deps"
     startCommand: "uvicorn app.main:app --host 0.0.0.0 --port $PORT"
     envVars:
       - key: SUPABASE_URL
@@ -14,4 +14,4 @@ services:
       - key: ALLOWED_ORIGINS
         sync: false
       - key: PLAYWRIGHT_BROWSERS_PATH
-        value: "0"
+        value: "/opt/render/project/src/playwright-browsers"
