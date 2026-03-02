@@ -76,4 +76,4 @@ async def export_pdf(share_id: uuid.UUID, request: Request, db: Session = Depend
                 
         except Exception as e:
             logger.error(f"Internal PDF Generation Error for {share_id}: {str(e)}")
-            raise HTTPException(status_code=500, detail="Failed to generate PDF due to a server rendering error.")
+            raise HTTPException(status_code=500, detail=f"Failed to generate PDF: {str(e)}")
