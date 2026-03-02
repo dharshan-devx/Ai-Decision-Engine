@@ -7,8 +7,7 @@ An advanced multi-agent AI framework engineered to structure complex life and st
 
 ---
 
-![Decision Engine Preview](https://via.placeholder.com/800x400.png?text=AI+Decision+Engine+Screenshot) *(Imagine a beautiful glassmorphism dark-themed dashboard here)*
-
+![Decision Engine Preview](assets/preview.png)
 ---
 
 ---
