@@ -158,18 +158,37 @@ export default function App() {
     }
   }, [engine.dilemma, engine.result]);
 
-  const handleExportPDF = useCallback(() => {
+  const handleExportPDF = useCallback(async () => {
     if (!engine.result) {
       setToast("No analysis to export.");
       return;
     }
-    setToast("Preparing native PDF export...");
-    setTimeout(() => {
-      window.print();
-    }, 800);
-  }, [engine.result]);
+    setToast("Your PDF is rendering on the server... Please wait.");
+    try {
+      const shareData = await createShareLink(engine.dilemma, engine.result);
+      const shareId = shareData.id;
 
+      const baseUrl = process.env.NEXT_PUBLIC_API_URL || process.env.VITE_API_URL || "http://localhost:8000";
+      window.location.href = `${baseUrl}/api/export/${shareId}`;
 
+    } catch (e) {
+      console.error("PDF generation failed:", e);
+      setToast("PDF generation failed. Please try again.");
+    }
+  }, [engine.result, engine.dilemma]);
+
+  if (printMode) {
+    return (
+      <div className="pdf-export" style={{ background: '#0a0a08', minHeight: '100vh', padding: '40px' }}>
+        <OutputPanel
+          loading={engine.loading}
+          result={engine.result}
+          error={engine.error}
+          dilemma={engine.dilemma}
+        />
+      </div>
+    );
+  }
 
   return (
     <div className="app">
