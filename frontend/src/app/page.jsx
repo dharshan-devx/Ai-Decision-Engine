@@ -11,7 +11,6 @@ import ErrorBoundary from "../components/ErrorBoundary";
 import { useDecisionEngine } from "../hooks/useDecisionEngine";
 import { useHistory } from "../hooks/useHistory";
 import LZString from "lz-string";
-import generatePDF from "../lib/generatePDF";
 import { createShareLink, getSharedAnalysis } from "../lib/api";
 
 export default function App() {
@@ -205,14 +204,15 @@ export default function App() {
     }
   }, [engine.dilemma, engine.result, copyToClipboard]);
 
-  const handleExportPDF = useCallback(() => {
+  const handleExportPDF = useCallback(async () => {
     if (!engine.result) {
       setToast("No analysis to export.");
       return;
     }
     try {
       setToast("Generating your PDF...");
-      // Use client-side jsPDF — no server dependency, works for ALL users
+      // Dynamic import — only loads jsPDF when user clicks Export
+      const { default: generatePDF } = await import("../lib/generatePDF");
       generatePDF(engine.result, engine.dilemma);
       setTimeout(() => setToast("✅ PDF downloaded successfully!"), 500);
     } catch (e) {
