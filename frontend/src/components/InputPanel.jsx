@@ -12,6 +12,7 @@ export default function InputPanel({
   age, setAge,
   riskProfile, setRiskProfile,
   timeHorizon, setTimeHorizon,
+  language, setLanguage,
   context, setContext,
   uploading, onFileUpload,
   apiKey, setApiKey,
@@ -71,6 +72,17 @@ export default function InputPanel({
             <option value="short-term">Short-term (1–2 yr)</option>
             <option value="medium-term">Medium-term (3–5 yr)</option>
             <option value="long-term">Long-term (5–10+ yr)</option>
+          </select>
+        </div>
+        <div>
+          <div className="field-label" style={{ display: 'flex', alignItems: 'center' }}>
+            Response Language
+            <HelpIcon tooltip="Choose the language for the analysis output. You can type your dilemma in any language." />
+          </div>
+          <select className="field-select" value={language} onChange={(e) => setLanguage(e.target.value)}>
+            <option value="english">English</option>
+            <option value="hindi">हिन्दी (Hindi)</option>
+            <option value="telugu">తెలుగు (Telugu)</option>
           </select>
         </div>
         <div style={{ gridColumn: "1 / -1" }}>

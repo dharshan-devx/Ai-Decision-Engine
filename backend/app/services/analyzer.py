@@ -14,5 +14,6 @@ async def analyze_decision(request: AnalyzeRequest) -> dict:
         time_horizon=request.time_horizon or "medium-term",
         context=request.context or "",
         api_key=request.api_key,
+        language=request.language or "english",
     )
     return result

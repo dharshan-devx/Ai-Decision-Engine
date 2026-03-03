@@ -1,8 +1,8 @@
 "use client";
 
-export default function NeuralBrain() {
+export default function NeuralBrain({ className = "", style = {} }) {
     return (
-        <div className="neural-brain-container">
+        <div className={`neural-brain-container ${className}`} style={style}>
             <svg viewBox="0 0 400 400" className="neural-brain-svg" xmlns="http://www.w3.org/2000/svg">
                 {/* Neural connections (lines) */}
                 <g className="neural-connections" stroke="var(--accent)" strokeWidth="1.2" fill="none" opacity="0.4">

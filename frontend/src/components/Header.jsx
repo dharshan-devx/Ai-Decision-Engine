@@ -1,6 +1,7 @@
 "use client";
 import { useState, useEffect } from "react";
 import api from "../lib/api";
+import NeuralBrain from "./NeuralBrain";
 
 export default function Header({ showHistory, setShowHistory, compareMode, setCompareMode }) {
   const [apiActive, setApiActive] = useState(true);
@@ -34,6 +35,9 @@ export default function Header({ showHistory, setShowHistory, compareMode, setCo
       <div className="header-left">
         <span className="logo">Decision Engine</span>
         <span className="logo-sub">Strategic Reasoning System</span>
+      </div>
+      <div className="header-center">
+        <NeuralBrain style={{ width: '40px', height: '40px', background: 'transparent' }} />
       </div>
       <div className="header-right">
 

@@ -10,6 +10,7 @@ class AnalyzeRequest(BaseModel):
     time_horizon: Optional[Literal["short-term", "medium-term", "long-term"]] = "medium-term"
     context: Optional[str] = Field(None, description="Optional parsed context from uploaded docs")
     api_key: Optional[str] = Field(None, description="Optional custom Gemini API key for this request")
+    language: Optional[str] = Field("english", description="Response language: english, hindi, or telugu")
 
     model_config = {
         "json_schema_extra": {

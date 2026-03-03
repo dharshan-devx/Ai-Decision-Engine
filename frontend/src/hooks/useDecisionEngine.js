@@ -18,6 +18,7 @@ export function useDecisionEngine() {
   const [riskProfile, setRiskProfile] = useState("moderate");
   const [timeHorizon, setTimeHorizon] = useState("medium-term");
   const [apiKey, setApiKey] = useState("");
+  const [language, setLanguage] = useState("english");
   const [context, setContext] = useState("");
   const [uploading, setUploading] = useState(false);
   const [loading, setLoading] = useState(false);
@@ -65,7 +66,7 @@ export function useDecisionEngine() {
     setError(null);
     startLoadingAnimation();
     try {
-      const res = await analyzeDecision({ dilemma, age, riskProfile, timeHorizon, context, apiKey });
+      const res = await analyzeDecision({ dilemma, age, riskProfile, timeHorizon, context, apiKey, language });
       setResult(res);
     } catch (e) {
       const msg = e?.response?.data?.detail || e.message || "Analysis failed";
@@ -83,6 +84,7 @@ export function useDecisionEngine() {
     timeHorizon, setTimeHorizon,
     context, setContext,
     apiKey, setApiKey,
+    language, setLanguage,
     loading, loadingStep, result, error,
     uploading, handleFileUpload,
     setResult,

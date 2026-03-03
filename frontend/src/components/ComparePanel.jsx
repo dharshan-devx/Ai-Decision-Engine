@@ -4,7 +4,7 @@ import { analyzeDecision } from "../lib/api";
 import HelpIcon from "./HelpIcon";
 import NeuralBrain from "./NeuralBrain";
 
-export default function ComparePanel({ saveAnalysis, restoreData, age, riskProfile, timeHorizon }) {
+export default function ComparePanel({ saveAnalysis, restoreData, age, riskProfile, timeHorizon, language }) {
     const [dilemmaA, setDilemmaA] = useState("");
     const [dilemmaB, setDilemmaB] = useState("");
     const [resultA, setResultA] = useState(null);
@@ -63,7 +63,8 @@ export default function ComparePanel({ saveAnalysis, restoreData, age, riskProfi
                 age: age || "",
                 riskProfile: riskProfile || "moderate",
                 timeHorizon: timeHorizon || "medium-term",
-                apiKey
+                apiKey,
+                language: language || "english"
             });
             setResult(res);
         } catch (e) {

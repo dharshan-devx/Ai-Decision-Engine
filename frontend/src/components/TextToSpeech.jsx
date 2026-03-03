@@ -43,7 +43,7 @@ function extractTextFromData(data, dilemma) {
     return parts.join(". ");
 }
 
-export default function TextToSpeech({ data, dilemma }) {
+export default function TextToSpeech({ data, dilemma, language = "english" }) {
     const [speaking, setSpeaking] = useState(false);
     const [paused, setPaused] = useState(false);
     const utteranceRef = useRef(null);
@@ -74,17 +74,33 @@ export default function TextToSpeech({ data, dilemma }) {
         utterance.rate = 1.0;
         utterance.pitch = 1.0;
         utterance.volume = 1.0;
-        utterance.lang = "en-US";
+        let targetLang = "en-US";
+        if (language === "hindi") targetLang = "hi-IN";
+        if (language === "telugu") targetLang = "te-IN";
 
-        // Prefer smooth, deep male voices
+        utterance.lang = targetLang;
+
         const voices = window.speechSynthesis.getVoices();
-        const preferred = voices.find(v => /Google UK English Male/i.test(v.name))
-            || voices.find(v => /Microsoft David/i.test(v.name))
-            || voices.find(v => /Daniel/i.test(v.name) && v.lang.startsWith("en"))
-            || voices.find(v => /James/i.test(v.name) && v.lang.startsWith("en"))
-            || voices.find(v => /male/i.test(v.name) && v.lang.startsWith("en"))
-            || voices.find(v => v.lang.startsWith("en") && v.name.includes("Google"))
-            || voices.find(v => v.lang.startsWith("en"));
+        let preferred = null;
+
+        if (language === "english") {
+            // Prefer confident English male voices
+            preferred = voices.find(v => /Google UK English Male/i.test(v.name))
+                || voices.find(v => /Microsoft David/i.test(v.name))
+                || voices.find(v => /Daniel/i.test(v.name) && v.lang.startsWith("en"))
+                || voices.find(v => /James/i.test(v.name) && v.lang.startsWith("en"))
+                || voices.find(v => /male/i.test(v.name) && v.lang.startsWith("en"))
+                || voices.find(v => v.lang.startsWith("en") && v.name.includes("Google"))
+                || voices.find(v => v.lang.startsWith("en"));
+        } else {
+            // For Hindi/Telugu, try to find a matching voice (male preferred, but any matching lang is fallback)
+            preferred = voices.find(v => v.lang.startsWith(targetLang) && /male|man/i.test(v.name))
+                || voices.find(v => v.lang.startsWith(targetLang) && v.name.includes("Google"))
+                || voices.find(v => v.lang.startsWith(targetLang))
+                // Fallback to hindi if telugu voice is not found on device, it might read better
+                || (language === "telugu" ? voices.find(v => v.lang.startsWith("hi-IN")) : null);
+        }
+
         if (preferred) utterance.voice = preferred;
 
         utterance.onstart = () => { setSpeaking(true); setPaused(false); };
@@ -93,7 +109,7 @@ export default function TextToSpeech({ data, dilemma }) {
 
         utteranceRef.current = utterance;
         window.speechSynthesis.speak(utterance);
-    }, [data, dilemma, speaking, paused, isSupported]);
+    }, [data, dilemma, speaking, paused, isSupported, language]);
 
     const handleStop = useCallback(() => {
         if (!isSupported) return;

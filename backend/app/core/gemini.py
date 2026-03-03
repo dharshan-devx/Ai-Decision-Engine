@@ -114,12 +114,25 @@ You must respond ONLY with valid JSON matching the exact schema provided. No pro
 Pay special attention to constructing the `decisionTree` field with logical branching paths (at least 4-5 nodes)."""
 
 
-def build_agent_prompt(dilemma: str, age: str, risk_profile: str, time_horizon: str, context: str = "") -> str:
+LANGUAGE_MAP = {
+    "english": "English",
+    "hindi": "Hindi (हिन्दी)",
+    "telugu": "Telugu (తెలుగు)",
+}
+
+def build_agent_prompt(dilemma: str, age: str, risk_profile: str, time_horizon: str, context: str = "", language: str = "english") -> str:
     prompt = f"DILEMMA: {dilemma}\nUSER AGE: {age or 'unknown'}\nRISK PROFILE: {risk_profile or 'moderate'}\nTIME HORIZON: {time_horizon or 'medium-term'}\n"
     if context: prompt += f"ADDITIONAL CONTEXT:\n{context}\n\n"
+    if language and language != "english":
+        lang_name = LANGUAGE_MAP.get(language, language)
+        prompt += f"\nIMPORTANT: Respond entirely in {lang_name}. All text must be in {lang_name}.\n"
     return prompt
 
-def build_synthesizer_prompt(base_prompt: str, optimist_text: str, risk_manager_text: str) -> str:
+def build_synthesizer_prompt(base_prompt: str, optimist_text: str, risk_manager_text: str, language: str = "english") -> str:
+    lang_instruction = ""
+    if language and language != "english":
+        lang_name = LANGUAGE_MAP.get(language, language)
+        lang_instruction = f"\nCRITICAL: ALL string values in the JSON must be written in {lang_name}. Keep JSON keys in English but write ALL values, descriptions, names, and reasoning in {lang_name}.\n"
     return f"""{base_prompt}
 ---
 OPTIMIST PERSPECTIVE:
@@ -128,7 +141,7 @@ OPTIMIST PERSPECTIVE:
 RISK MANAGER PERSPECTIVE:
 {risk_manager_text}
 ---
-Be concise in all string values. Return ONLY the following JSON structure:
+{lang_instruction}Be concise in all string values. Return ONLY the following JSON structure:
 {JSON_SCHEMA}"""
 
 
@@ -201,7 +214,7 @@ def repair_json(raw: str) -> dict:
     raise ValueError("Could not parse or repair AI response JSON")
 
 
-async def run_analysis(dilemma: str, age: str, risk_profile: str, time_horizon: str, context: str = "", api_key: str = None) -> dict:
+async def run_analysis(dilemma: str, age: str, risk_profile: str, time_horizon: str, context: str = "", api_key: str = None, language: str = "english") -> dict:
     if not api_key and not ai_status.can_attempt_request():
         r = ai_status.get_retry_remaining_seconds()
         raise Exception(f"429 RESOURCE_EXHAUSTED: AI quota exceeded. Try again in {r // 3600}h {(r % 3600) // 60}m.")
@@ -210,7 +223,7 @@ async def run_analysis(dilemma: str, age: str, risk_profile: str, time_horizon: 
     client_key = api_key if api_key else settings.gemini_api_key
     client = genai.Client(api_key=client_key)
 
-    base_prompt = build_agent_prompt(dilemma, age, risk_profile, time_horizon, context)
+    base_prompt = build_agent_prompt(dilemma, age, risk_profile, time_horizon, context, language)
 
     # Run Agent A and Agent B concurrently
     async def run_agent(sys_instruction: str) -> str:
@@ -233,7 +246,7 @@ async def run_analysis(dilemma: str, age: str, risk_profile: str, time_horizon: 
         )
 
         # Run Agent C (Synthesizer)
-        synth_prompt = build_synthesizer_prompt(base_prompt, optimist_text, risk_text)
+        synth_prompt = build_synthesizer_prompt(base_prompt, optimist_text, risk_text, language)
         
         response = await asyncio.to_thread(
             client.models.generate_content,

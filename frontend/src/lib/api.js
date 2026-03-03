@@ -19,7 +19,7 @@ api.interceptors.request.use((config) => {
   return config;
 });
 
-export async function analyzeDecision({ dilemma, age, riskProfile, timeHorizon, context, apiKey }) {
+export async function analyzeDecision({ dilemma, age, riskProfile, timeHorizon, context, apiKey, language }) {
   const { data } = await api.post("/analyze", {
     dilemma,
     age: age || null,
@@ -27,6 +27,7 @@ export async function analyzeDecision({ dilemma, age, riskProfile, timeHorizon, 
     time_horizon: timeHorizon || "medium-term",
     context: context || null,
     api_key: apiKey || null,
+    language: language || "english",
   });
   return data.data; // unwrap { success, data }
 }

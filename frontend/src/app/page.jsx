@@ -294,6 +294,7 @@ export default function App() {
             age={engine.age}
             riskProfile={engine.riskProfile}
             timeHorizon={engine.timeHorizon}
+            language={engine.language}
           />
         </div>
 
@@ -303,6 +304,7 @@ export default function App() {
             age={engine.age} setAge={engine.setAge}
             riskProfile={engine.riskProfile} setRiskProfile={engine.setRiskProfile}
             timeHorizon={engine.timeHorizon} setTimeHorizon={engine.setTimeHorizon}
+            language={engine.language} setLanguage={engine.setLanguage}
             context={engine.context} setContext={engine.setContext}
             uploading={engine.uploading} onFileUpload={engine.handleFileUpload}
             apiKey={engine.apiKey} setApiKey={engine.setApiKey}
@@ -323,7 +325,7 @@ export default function App() {
               <button className="result-action-btn" onClick={handleShare} title="Share Analysis (Ctrl+Shift+S)">
                 🔗 Share
               </button>
-              <TextToSpeech data={engine.result} dilemma={engine.dilemma} />
+              <TextToSpeech data={engine.result} dilemma={engine.dilemma} language={engine.language} />
             </div>
           )}
           <div ref={resultsRef}>
