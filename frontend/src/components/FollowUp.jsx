@@ -29,7 +29,7 @@ export default function FollowUp({ dilemma, analysisData, apiKey }) {
                 defaultSuggestions[2] = `Why did you recommend ${analysisData.recommendations.mostRational.choice}?`;
             }
             if (analysisData.riskAnalysis && analysisData.riskAnalysis.length > 0) {
-                const topRisk = analysisData.riskAnalysis.sort((a, b) => b.score - a.score)[0];
+                const topRisk = [...analysisData.riskAnalysis].sort((a, b) => b.score - a.score)[0];
                 if (topRisk?.name) {
                     defaultSuggestions[1] = `How specifically do I mitigate the "${topRisk.name}" risk?`;
                 }

@@ -7,6 +7,7 @@ import HistoryPanel from "../components/HistoryPanel";
 import ComparePanel from "../components/ComparePanel";
 import Toast from "../components/Toast";
 import PrintTemplate from "../components/PrintTemplate";
+import ErrorBoundary from "../components/ErrorBoundary";
 import { useDecisionEngine } from "../hooks/useDecisionEngine";
 import { useHistory } from "../hooks/useHistory";
 import LZString from "lz-string";
@@ -71,8 +72,12 @@ export default function App() {
         if (shareId) {
           try {
             const sharedData = await getSharedAnalysis(shareId);
-            if (sharedData.dilemma) engine.setDilemma(sharedData.dilemma);
-            if (sharedData.data) engine.setResult(sharedData.data);
+            if (sharedData && typeof sharedData === 'object') {
+              if (sharedData.dilemma) engine.setDilemma(String(sharedData.dilemma));
+              if (sharedData.data && typeof sharedData.data === 'object') {
+                engine.setResult(sharedData.data);
+              }
+            }
             if (!isPrintMode) {
               window.history.replaceState({}, "", window.location.pathname);
             }
@@ -230,104 +235,106 @@ export default function App() {
   }
 
   return (
-    <div className="app">
-      <Header
-        showHistory={showHistory}
-        setShowHistory={setShowHistory}
-        compareMode={compareMode}
-        setCompareMode={setCompareMode}
-      />
-
-      <div className="main" style={{ display: compareMode ? "block" : "none" }}>
-        <ComparePanel
-          saveAnalysis={saveAnalysis}
-          restoreData={compareRestoreData}
-          age={engine.age}
-          riskProfile={engine.riskProfile}
-          timeHorizon={engine.timeHorizon}
-        />
-      </div>
-
-      <div className="main" style={{ display: !compareMode ? "block" : "none" }}>
-        <InputPanel
-          dilemma={engine.dilemma} setDilemma={engine.setDilemma}
-          age={engine.age} setAge={engine.setAge}
-          riskProfile={engine.riskProfile} setRiskProfile={engine.setRiskProfile}
-          timeHorizon={engine.timeHorizon} setTimeHorizon={engine.setTimeHorizon}
-          context={engine.context} setContext={engine.setContext}
-          uploading={engine.uploading} onFileUpload={engine.handleFileUpload}
-          apiKey={engine.apiKey} setApiKey={engine.setApiKey}
-          loading={engine.loading}
-          hasResult={!!engine.result}
-          onAnalyze={engine.handleAnalyze}
+    <ErrorBoundary>
+      <div className="app">
+        <Header
+          showHistory={showHistory}
+          setShowHistory={setShowHistory}
+          compareMode={compareMode}
+          setCompareMode={setCompareMode}
         />
 
-        {/* Global Action Buttons */}
-        {engine.result && !engine.loading && (
-          <div className="result-actions global-actions">
-            <button className="result-action-btn" onClick={handleExportPDF} title="Export as PDF">
-              📄 Export PDF
-            </button>
-            <button className="result-action-btn" onClick={handleShare} title="Share Analysis">
-              🔗 Share
-            </button>
-          </div>
-        )}
-        <div ref={resultsRef}>
-          <OutputPanel
+        <div className="main" style={{ display: compareMode ? "block" : "none" }}>
+          <ComparePanel
+            saveAnalysis={saveAnalysis}
+            restoreData={compareRestoreData}
+            age={engine.age}
+            riskProfile={engine.riskProfile}
+            timeHorizon={engine.timeHorizon}
+          />
+        </div>
+
+        <div className="main" style={{ display: !compareMode ? "block" : "none" }}>
+          <InputPanel
+            dilemma={engine.dilemma} setDilemma={engine.setDilemma}
+            age={engine.age} setAge={engine.setAge}
+            riskProfile={engine.riskProfile} setRiskProfile={engine.setRiskProfile}
+            timeHorizon={engine.timeHorizon} setTimeHorizon={engine.setTimeHorizon}
+            context={engine.context} setContext={engine.setContext}
+            uploading={engine.uploading} onFileUpload={engine.handleFileUpload}
+            apiKey={engine.apiKey} setApiKey={engine.setApiKey}
             loading={engine.loading}
-            loadingStep={engine.loadingStep}
-            result={engine.result}
-            error={engine.error}
-            dilemma={engine.dilemma}
-            apiKey={engine.apiKey}
-            onShare={handleShare}
-            onExportPDF={handleExportPDF}
+            hasResult={!!engine.result}
+            onAnalyze={engine.handleAnalyze}
           />
+
+          {/* Global Action Buttons */}
+          {engine.result && !engine.loading && (
+            <div className="result-actions global-actions">
+              <button className="result-action-btn" onClick={handleExportPDF} title="Export as PDF">
+                📄 Export PDF
+              </button>
+              <button className="result-action-btn" onClick={handleShare} title="Share Analysis">
+                🔗 Share
+              </button>
+            </div>
+          )}
+          <div ref={resultsRef}>
+            <OutputPanel
+              loading={engine.loading}
+              loadingStep={engine.loadingStep}
+              result={engine.result}
+              error={engine.error}
+              dilemma={engine.dilemma}
+              apiKey={engine.apiKey}
+              onShare={handleShare}
+              onExportPDF={handleExportPDF}
+            />
+          </div>
         </div>
-      </div>
 
-      {
-        showHistory && (
-          <HistoryPanel
-            history={history}
-            onSelect={handleHistorySelect}
-            onDelete={deleteAnalysis}
-            onClear={clearHistory}
-            onClose={() => setShowHistory(false)}
-          />
-        )
-      }
+        {
+          showHistory && (
+            <HistoryPanel
+              history={history}
+              onSelect={handleHistorySelect}
+              onDelete={deleteAnalysis}
+              onClear={clearHistory}
+              onClose={() => setShowHistory(false)}
+            />
+          )
+        }
 
-      {toast && <Toast message={toast} onClose={() => setToast(null)} />}
+        {toast && <Toast message={toast} onClose={() => setToast(null)} />}
 
-      <button
-        className={`scroll-top-btn ${showScrollTop ? 'visible' : ''}`}
-        onClick={scrollToTop}
-        title="Scroll to top"
-      >
-        ↑
-      </button>
+        <button
+          className={`scroll-top-btn ${showScrollTop ? 'visible' : ''}`}
+          onClick={scrollToTop}
+          title="Scroll to top"
+        >
+          ↑
+        </button>
 
-      <footer className="app-footer">
-        <div className="footer-content" style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '6px' }}>
-          <span style={{ fontSize: '12px', color: 'var(--text-dim)', letterSpacing: '0.02em', fontWeight: 600 }}>
-            © 2026 Decision Engine. All Rights Reserved.
-          </span>
-          <span style={{ fontSize: '13px', color: 'var(--text-dim)', letterSpacing: '0.01em', textAlign: 'center', maxWidth: '900px', padding: '0 10px' }}>
-            Built for precision, clarity, and rigorous strategic reasoning. Designed to minimize cognitive bias and optimize outcomes.
-          </span>
-          <span className="footer-credits">
-            <a href="https://www.linkedin.com/in/dharshansondi/" target="_blank" rel="noopener noreferrer" className="footer-link">
-              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="linkedin-icon">
-                <path d="M19 0h-14c-2.761 0-5 2.239-5 5v14c0 2.761 2.239 5 5 5h14c2.762 0 5-2.239 5-5v-14c0-2.761-2.238-5-5-5zm-11 19h-3v-11h3v11zm-1.5-12.268c-.966 0-1.75-.79-1.75-1.764s.784-1.764 1.75-1.764 1.75.79 1.75 1.764-.783 1.764-1.75 1.764zm13.5 12.268h-3v-5.604c0-3.368-4-3.113-4 0v5.604h-3v-11h3v1.765c1.396-2.586 7-2.777 7 2.476v6.759z" />
-              </svg>
-              Dharshan Sondi
-            </a>
-          </span>
-        </div>
-      </footer>
-    </div >
+        <footer className="app-footer">
+          <div className="footer-content" style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '6px' }}>
+            <span style={{ fontSize: '12px', color: 'var(--text-dim)', letterSpacing: '0.02em', fontWeight: 600 }}>
+              © 2026 Decision Engine. All Rights Reserved.
+            </span>
+            <span style={{ fontSize: '13px', color: 'var(--text-dim)', letterSpacing: '0.01em', textAlign: 'center', maxWidth: '900px', padding: '0 10px' }}>
+              Built for precision, clarity, and rigorous strategic reasoning. Designed to minimize cognitive bias and optimize outcomes.
+            </span>
+            <span className="footer-credits">
+              <a href="https://www.linkedin.com/in/dharshansondi/" target="_blank" rel="noopener noreferrer" className="footer-link">
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="linkedin-icon">
+                  <path d="M19 0h-14c-2.761 0-5 2.239-5 5v14c0 2.761 2.239 5 5 5h14c2.762 0 5-2.239 5-5v-14c0-2.761-2.238-5-5-5zm-11 19h-3v-11h3v11zm-1.5-12.268c-.966 0-1.75-.79-1.75-1.764s.784-1.764 1.75-1.764 1.75.79 1.75 1.764-.783 1.764-1.75 1.764zm13.5 12.268h-3v-5.604c0-3.368-4-3.113-4 0v5.604h-3v-11h3v1.765c1.396-2.586 7-2.777 7 2.476v6.759z" />
+                </svg>
+                Dharshan Sondi
+              </a>
+            </span>
+          </div>
+        </footer>
+      </div >
+    </ErrorBoundary>
   );
 }
 
