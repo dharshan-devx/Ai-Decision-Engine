@@ -1,10 +1,12 @@
 "use client";
-import { useState, useEffect } from "react";
+import React, { useState, useEffect } from "react";
 import api from "../lib/api";
 import NeuralBrain from "./NeuralBrain";
+import AboutModal from "./AboutModal";
 
 export default function Header({ showHistory, setShowHistory, compareMode, setCompareMode }) {
   const [apiActive, setApiActive] = useState(true);
+  const [aboutOpen, setAboutOpen] = useState(false);
 
   useEffect(() => {
     if (typeof window !== "undefined") {
@@ -36,7 +38,12 @@ export default function Header({ showHistory, setShowHistory, compareMode, setCo
         <span className="logo">Decision Engine</span>
         <span className="logo-sub">Strategic Reasoning System</span>
       </div>
-      <div className="header-center">
+      <div
+        className="header-center"
+        onClick={() => setAboutOpen(true)}
+        style={{ cursor: "pointer" }}
+        title="About Decision Engine"
+      >
         <NeuralBrain style={{ width: '40px', height: '40px', background: 'transparent' }} />
       </div>
       <div className="header-right">
@@ -63,6 +70,7 @@ export default function Header({ showHistory, setShowHistory, compareMode, setCo
           {apiActive === "active" ? "AI Layer Active" : apiActive === "quota_exceeded" ? "API Quota Exceeded" : apiActive === "unknown" ? "AI Layer Standby" : "AI Layer Offline"}
         </div>
       </div>
+      <AboutModal isOpen={aboutOpen} onClose={() => setAboutOpen(false)} />
     </header>
   );
 }
