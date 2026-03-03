@@ -3,9 +3,9 @@ import HelpIcon from "./HelpIcon";
 import CustomSelect from "./CustomSelect";
 
 const EXAMPLES = [
-  "Should I quit my job at a stable tech company to pursue a B2B SaaS startup in the HR space?",
-  "Should I order a large pepperoni pizza for myself at 2 AM even though I'm supposed to be on a diet, or just eat sad carrots?",
-  "I'm considering relocating my family across the country for a high-paying executive role, but my kids are finally settled in their schools. Is the financial gain worth the familial disruption?",
+  "Should I prioritize building my own future in another city or country, even if it means being away from my parents when they’re slowly growing older?",
+  "I feel exhausted, unmotivated, and constantly comparing myself to others ~ should I slow down and focus on my mental health, or keep pushing so I don’t fall behind?",
+  "Should I study what genuinely interests me, even if the path is uncertain, or choose a safer field just to guarantee financial stability?",
 ];
 
 export default function InputPanel({
