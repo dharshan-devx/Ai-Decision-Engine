@@ -1,5 +1,5 @@
 "use client";
-import { useMemo, useCallback, useState } from "react";
+import { useMemo, useCallback, useState, useEffect, useRef } from "react";
 import {
     ReactFlow,
     MiniMap,
@@ -156,8 +156,7 @@ export default function DecisionTree({ data }) {
                     boxShadow: `0 4px 16px rgba(0,0,0,0.3), 0 0 20px ${glowColor}`,
                     backdropFilter: 'blur(12px)',
                     width: nodeWidth,
-                    transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
-                    cursor: 'pointer',
+                    cursor: 'grab',
                 }
             };
         });
@@ -202,23 +201,32 @@ export default function DecisionTree({ data }) {
     }, [data]);
 
     const { nodes: layoutedNodes, edges: layoutedEdges } = useMemo(
-        () => getLayoutedElements(initialNodes, initialEdges, direction),
+        () => getLayoutedElements(
+            initialNodes.map(n => ({ ...n })),
+            initialEdges.map(e => ({ ...e })),
+            direction
+        ),
         [initialNodes, initialEdges, direction]
     );
 
     const [nodes, setNodes, onNodesChange] = useNodesState(layoutedNodes);
     const [edges, setEdges, onEdgesChange] = useEdgesState(layoutedEdges);
 
-    // Re-layout when direction changes
-    useMemo(() => {
-        const { nodes: newNodes, edges: newEdges } = getLayoutedElements(
-            initialNodes.map(n => ({ ...n })),
-            initialEdges.map(e => ({ ...e })),
-            direction
-        );
-        setNodes(newNodes);
-        setEdges(newEdges);
-    }, [direction, initialNodes, initialEdges]);
+    // Track if this is a user-triggered direction change
+    const prevDirection = useRef(direction);
+
+    useEffect(() => {
+        if (prevDirection.current !== direction) {
+            prevDirection.current = direction;
+            const { nodes: newNodes, edges: newEdges } = getLayoutedElements(
+                initialNodes.map(n => ({ ...n })),
+                initialEdges.map(e => ({ ...e })),
+                direction
+            );
+            setNodes(newNodes);
+            setEdges(newEdges);
+        }
+    }, [direction]);
 
     if (!data?.decisionTree?.nodes?.length) {
         return (
@@ -455,8 +463,11 @@ export default function DecisionTree({ data }) {
 
             {/* Custom CSS for ReactFlow overrides */}
             <style>{`
+                .react-flow__node {
+                    transition: box-shadow 0.2s ease, filter 0.2s ease !important;
+                }
                 .react-flow__node:hover {
-                    transform: scale(1.03) !important;
+                    filter: brightness(1.15);
                     z-index: 10 !important;
                 }
                 .react-flow__node.selected {
