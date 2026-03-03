@@ -71,7 +71,7 @@ export default function AboutModal({ isOpen, onClose }) {
                                 <p className="about-text">
                                     A high-dimensional cognitive engine built for complex, high-stakes dilemmas.
                                     It systematically deconstructs problems to neutralize human biases, forecast probabilistic
-                                    outcomes, and surface hidden risks — delivering actionable clarity.
+                                    outcomes, and surface hidden risks ~ delivering actionable clarity.
                                 </p>
                                 <div className="about-creator-card">
                                     <div className="creator-label">Crafted by</div>
@@ -92,11 +92,11 @@ export default function AboutModal({ isOpen, onClose }) {
                                 <div className="about-grid" style={{ gridTemplateColumns: '1fr', gap: '10px' }}>
                                     <div className="about-feature">
                                         <h3 style={{ marginTop: 0 }}>🚫 Beyond Conversation</h3>
-                                        <p>Standard models often engage in open-ended chat and "sycophancy" — agreeing just to be helpful. This engine strips away filler to deliver blunt, structured, objective outputs.</p>
+                                        <p>Standard models often engage in open-ended chat and "sycophancy" ~ agreeing just to be helpful. This engine strips away filler to deliver blunt, structured, objective outputs.</p>
                                     </div>
                                     <div className="about-feature">
                                         <h3 style={{ marginTop: 0 }}>⚙️ Multi-Agent Pipeline</h3>
-                                        <p>Rather than a single prompt handling everything, dilemmas are routed through specialized analytical stages — Risk Assessment, Bias Detection, and Strategic Planning — ensuring no angle is missed.</p>
+                                        <p>Rather than a single prompt handling everything, dilemmas are routed through specialized analytical stages ~ Risk Assessment, Bias Detection, and Strategic Planning — ensuring no angle is missed.</p>
                                     </div>
                                     <div className="about-feature">
                                         <h3 style={{ marginTop: 0 }}>🔢 Quantitative Rigor</h3>
@@ -112,7 +112,7 @@ export default function AboutModal({ isOpen, onClose }) {
                                     <div className="about-feature">
                                         <span className="feature-icon">🧠</span>
                                         <h3>Bias Detection</h3>
-                                        <p>Uncovers emotional filters and cognitive fallacies — such as sunk cost or confirmation bias — that cloud judgment.</p>
+                                        <p>Uncovers emotional filters and cognitive fallacies ~ such as sunk cost or confirmation bias ~ that cloud judgment.</p>
                                     </div>
                                     <div className="about-feature">
                                         <span className="feature-icon">📊</span>
