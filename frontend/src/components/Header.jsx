@@ -6,7 +6,7 @@ import AboutModal from "./AboutModal";
 
 const ONBOARDING_KEY = "de_onboarding_done";
 
-export default function Header({ showHistory, setShowHistory, compareMode, setCompareMode }) {
+export default function Header({ showHistory, setShowHistory, compareMode, setCompareMode, siteStats, loading }) {
   const [apiActive, setApiActive] = useState(true);
   const [aboutOpen, setAboutOpen] = useState(false);
 
@@ -56,7 +56,7 @@ export default function Header({ showHistory, setShowHistory, compareMode, setCo
         style={{ cursor: "pointer" }}
         title="About Decision Engine"
       >
-        <NeuralBrain style={{ width: '40px', height: '40px', background: 'transparent' }} />
+        <NeuralBrain isLoading={loading} style={{ width: '40px', height: '40px', background: 'transparent' }} />
       </div>
       <div className="header-right">
 
@@ -76,10 +76,28 @@ export default function Header({ showHistory, setShowHistory, compareMode, setCo
         >
           <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>
         </button>
-        <span className="header-badge">Powered by Gemini</span>
-        <div className="header-status">
-          <div className={apiActive === "active" ? "status-dot" : apiActive === "quota_exceeded" ? "status-dot-quota" : apiActive === "unknown" ? "status-dot-unknown" : "status-dot-offline"} />
-          {apiActive === "active" ? "AI Layer Active" : apiActive === "quota_exceeded" ? "API Quota Exceeded" : apiActive === "unknown" ? "AI Layer Standby" : "AI Layer Offline"}
+        <div className="gemini-badge">
+          <svg className="gemini-icon" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M12 2L14.85 9.15L22 12L14.85 14.85L12 22L9.15 14.85L2 12L9.15 9.15L12 2Z" fill="currentColor" />
+          </svg>
+          <span className="gemini-text">Powered by Gemini</span>
+        </div>
+        <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: '4px' }}>
+          <div className="header-status">
+            <div className={apiActive === "active" ? "status-dot" : apiActive === "quota_exceeded" ? "status-dot-quota" : apiActive === "unknown" ? "status-dot-unknown" : "status-dot-offline"} />
+            {apiActive === "active" ? "AI Layer Active" : apiActive === "quota_exceeded" ? "API Quota Exceeded" : apiActive === "unknown" ? "AI Layer Standby" : "AI Layer Offline"}
+          </div>
+          {siteStats && (
+            <div className="header-stats">
+              <svg className="stats-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z" />
+                <circle cx="12" cy="12" r="3" />
+              </svg>
+              <span className="stats-text">
+                {siteStats.total_visits.toLocaleString()} visits <span className="stats-divider">·</span> {siteStats.unique_users.toLocaleString()} users
+              </span>
+            </div>
+          )}
         </div>
       </div>
       <AboutModal isOpen={aboutOpen} onClose={() => { setAboutOpen(false); localStorage.setItem(ONBOARDING_KEY, "true"); }} />

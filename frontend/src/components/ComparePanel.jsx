@@ -236,7 +236,7 @@ export default function ComparePanel({ saveAnalysis, restoreData, age, riskProfi
                     </button>
                     {loadingA && (
                         <div className="cmp-loading">
-                            <NeuralBrain />
+                            <NeuralBrain isLoading={true} />
                         </div>
                     )}
                     {renderCompactResult(resultA)}
@@ -276,7 +276,7 @@ export default function ComparePanel({ saveAnalysis, restoreData, age, riskProfi
                     </button>
                     {loadingB && (
                         <div className="cmp-loading">
-                            <NeuralBrain />
+                            <NeuralBrain isLoading={true} />
                         </div>
                     )}
                     {renderCompactResult(resultB)}

@@ -307,6 +307,8 @@ export default function App() {
           setShowHistory={setShowHistory}
           compareMode={compareMode}
           setCompareMode={setCompareMode}
+          siteStats={siteStats}
+          loading={engine.loading}
         />
 
         <div className="main" style={{ display: compareMode ? "block" : "none" }}>
@@ -409,11 +411,7 @@ export default function App() {
               </a>
             </span>
           </div>
-          {siteStats && (
-            <span className="footer-stats">
-              👁 {siteStats.total_visits.toLocaleString()} visits · {siteStats.unique_users.toLocaleString()} users
-            </span>
-          )}
+          {/* removed footer stats as per request to move below AI layer active */}
         </footer>
       </div >
     </ErrorBoundary>

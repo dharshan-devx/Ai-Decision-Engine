@@ -171,7 +171,7 @@ export default function OutputPanel({ loading, loadingStep, result, error, dilem
 
       {loading && (
         <div className="loading-brain-state" ref={loadingRef}>
-          <NeuralBrain />
+          <NeuralBrain isLoading={true} />
           <div className="loading-brain-steps">
             <div className="loading-brain-title">Processing Decision Structure</div>
             <div className="loading-steps-list">
