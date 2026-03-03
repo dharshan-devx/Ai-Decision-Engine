@@ -254,8 +254,8 @@ export default function App() {
         e.preventDefault();
         handleShare();
       }
-      // Ctrl+Shift+P = Export PDF
-      if (e.ctrlKey && e.shiftKey && (e.key === "P" || e.key === "p")) {
+      // Ctrl+Shift+P = Export PDF (English only)
+      if (e.ctrlKey && e.shiftKey && (e.key === "P" || e.key === "p") && engine.language === "english") {
         e.preventDefault();
         handleExportPDF();
       }
@@ -316,16 +316,20 @@ export default function App() {
           {/* Global Action Buttons */}
           {engine.result && !engine.loading && (
             <div className="result-actions global-actions">
-              <button className="result-action-btn" onClick={handleExportPDF} title="Export as PDF (Ctrl+Shift+P)">
-                📄 Export PDF
-              </button>
+              {engine.language === "english" && (
+                <button className="result-action-btn" onClick={handleExportPDF} title="Export as PDF (Ctrl+Shift+P)">
+                  📄 Export PDF
+                </button>
+              )}
               <button className="result-action-btn" onClick={handleExportMarkdown} title="Export as Markdown">
                 📝 Markdown
               </button>
               <button className="result-action-btn" onClick={handleShare} title="Share Analysis (Ctrl+Shift+S)">
                 🔗 Share
               </button>
-              <TextToSpeech data={engine.result} dilemma={engine.dilemma} language={engine.language} />
+              {engine.language === "english" && (
+                <TextToSpeech data={engine.result} dilemma={engine.dilemma} language={engine.language} />
+              )}
             </div>
           )}
           <div ref={resultsRef}>
