@@ -127,15 +127,48 @@ export default function App() {
     setShowHistory(false);
   };
 
+  // ─── Robust clipboard copy that works across ALL browsers ───
+  const copyToClipboard = useCallback(async (text) => {
+    // Method 1: Modern Clipboard API (works in most modern browsers over HTTPS)
+    if (navigator.clipboard && typeof navigator.clipboard.writeText === 'function') {
+      try {
+        await navigator.clipboard.writeText(text);
+        return true;
+      } catch (err) {
+        console.warn('Clipboard API failed, trying fallback:', err);
+      }
+    }
+
+    // Method 2: execCommand fallback (works in older browsers and HTTP contexts)
+    try {
+      const textarea = document.createElement('textarea');
+      textarea.value = text;
+      textarea.setAttribute('readonly', '');
+      textarea.style.cssText = 'position:fixed;top:-9999px;left:-9999px;opacity:0;';
+      document.body.appendChild(textarea);
+      textarea.select();
+      textarea.setSelectionRange(0, text.length);
+      const success = document.execCommand('copy');
+      document.body.removeChild(textarea);
+      if (success) return true;
+    } catch (err) {
+      console.warn('execCommand fallback failed:', err);
+    }
+
+    return false;
+  }, []);
+
   const handleShare = useCallback(async () => {
     try {
       if (!engine.result) return;
 
-      setToast("Generating secure share link...");
+      setToast("Generating share link...");
       const response = await createShareLink(engine.dilemma, engine.result);
       const url = `${window.location.origin}${window.location.pathname}?id=${response.id}`;
 
-      if (navigator.share) {
+      // Only use navigator.share on mobile devices where it's reliable
+      const isMobile = /Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
+      if (isMobile && navigator.share) {
         try {
           await navigator.share({
             title: "Decision Engine Analysis",
@@ -145,32 +178,38 @@ export default function App() {
           setToast("Successfully shared!");
           return;
         } catch (shareError) {
-          // If user cancels the share sheet, it throws an error. Just fall back to clipboard just in case.
-          console.log("Share API closed or failed, falling back to clipboard");
+          if (shareError.name === 'AbortError') {
+            setToast(null); // User cancelled, just dismiss
+            return;
+          }
+          console.log("Share API failed, falling back to clipboard");
         }
       }
 
-      await navigator.clipboard.writeText(url);
-      setToast("Share link copied to clipboard!");
+      // Desktop & fallback: copy to clipboard
+      const copied = await copyToClipboard(url);
+      if (copied) {
+        setToast("✅ Share link copied to clipboard!");
+      } else {
+        // Last resort: show the URL for manual copy
+        setToast(`Share link: ${url}`);
+      }
     } catch (e) {
       console.error("Share failed:", e);
-      setToast("Failed to generate share link. It might be blocked by your browser.");
+      setToast("Failed to generate share link. Please try again.");
     }
-  }, [engine.dilemma, engine.result]);
+  }, [engine.dilemma, engine.result, copyToClipboard]);
 
-  const handleExportPDF = useCallback(async () => {
+  const handleExportPDF = useCallback(() => {
     if (!engine.result) {
       setToast("No analysis to export.");
       return;
     }
-    setToast("Your PDF is rendering on the server... Please wait.");
     try {
-      const shareData = await createShareLink(engine.dilemma, engine.result);
-      const shareId = shareData.id;
-
-      const baseUrl = process.env.NEXT_PUBLIC_API_URL || process.env.VITE_API_URL || "http://localhost:8000";
-      window.location.href = `${baseUrl}/api/export/${shareId}`;
-
+      setToast("Generating your PDF...");
+      // Use client-side jsPDF — no server dependency, works for ALL users
+      generatePDF(engine.result, engine.dilemma);
+      setTimeout(() => setToast("✅ PDF downloaded successfully!"), 500);
     } catch (e) {
       console.error("PDF generation failed:", e);
       setToast("PDF generation failed. Please try again.");
