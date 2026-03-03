@@ -1,5 +1,6 @@
 "use client";
 import HelpIcon from "./HelpIcon";
+import CustomSelect from "./CustomSelect";
 
 const EXAMPLES = [
   "Should I quit my job at a stable tech company to pursue a B2B SaaS startup in the HR space?",
@@ -56,34 +57,46 @@ export default function InputPanel({
             Risk Profile
             <HelpIcon tooltip="Your tolerance for failure filters out overly conservative or recklessly aggressive paths based on your comfort." />
           </div>
-          <select className="field-select" value={riskProfile} onChange={(e) => setRiskProfile(e.target.value)}>
-            <option value="conservative">Conservative</option>
-            <option value="moderate">Moderate</option>
-            <option value="aggressive">Aggressive</option>
-            <option value="contrarian">Contrarian</option>
-          </select>
+          <CustomSelect
+            value={riskProfile}
+            onChange={setRiskProfile}
+            options={[
+              { value: "conservative", label: "Conservative" },
+              { value: "moderate", label: "Moderate" },
+              { value: "aggressive", label: "Aggressive" },
+              { value: "contrarian", label: "Contrarian" },
+            ]}
+          />
         </div>
         <div>
           <div className="field-label" style={{ display: 'flex', alignItems: 'center' }}>
             Time Horizon
             <HelpIcon tooltip="The relevancy timeframe prioritizes immediate vs delayed outcomes." />
           </div>
-          <select className="field-select" value={timeHorizon} onChange={(e) => setTimeHorizon(e.target.value)}>
-            <option value="short-term">Short-term (1–2 yr)</option>
-            <option value="medium-term">Medium-term (3–5 yr)</option>
-            <option value="long-term">Long-term (5–10+ yr)</option>
-          </select>
+          <CustomSelect
+            value={timeHorizon}
+            onChange={setTimeHorizon}
+            options={[
+              { value: "short-term", label: "Short-term (1–2 yr)" },
+              { value: "medium-term", label: "Medium-term (3–5 yr)" },
+              { value: "long-term", label: "Long-term (5–10+ yr)" },
+            ]}
+          />
         </div>
         <div>
           <div className="field-label" style={{ display: 'flex', alignItems: 'center' }}>
             Response Language
             <HelpIcon tooltip="Choose the language for the analysis output. You can type your dilemma in any language." />
           </div>
-          <select className="field-select" value={language} onChange={(e) => setLanguage(e.target.value)}>
-            <option value="english">English</option>
-            <option value="hindi">हिन्दी (Hindi)</option>
-            <option value="telugu">తెలుగు (Telugu)</option>
-          </select>
+          <CustomSelect
+            value={language}
+            onChange={setLanguage}
+            options={[
+              { value: "english", label: "English" },
+              { value: "hindi", label: "हिन्दी (Hindi)" },
+              { value: "telugu", label: "తెలుగు (Telugu)" },
+            ]}
+          />
         </div>
         <div style={{ gridColumn: "1 / -1" }}>
           <div className="field-label" style={{ display: 'flex', alignItems: 'center' }}>
