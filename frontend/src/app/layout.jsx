@@ -1,7 +1,7 @@
 import "../styles/globals.css";
 
 export const metadata = {
-    title: "AI Decision Engine — Strategic Reasoning System",
+    title: "Decision Engine",
     description: "AI-powered strategic decision analysis. Decompose any dilemma into 11 dimensions with probabilistic models, bias detection, and actionable recommendations.",
     keywords: ["decision engine", "AI analysis", "strategic thinking", "decision making", "cognitive bias"],
     authors: [{ name: "Dharshan Sondi" }],
