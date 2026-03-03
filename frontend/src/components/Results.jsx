@@ -1,10 +1,11 @@
 "use client";
-import { useState } from "react";
+import { useState, useCallback } from "react";
 import SkillRadar from "./charts/SkillRadar";
 import RiskSection from "./sections/RiskSection";
 import PathsSection from "./sections/PathsSection";
 import DecisionTree from "./DecisionTree";
 import HelpIcon from "./HelpIcon";
+import CopyButton from "./CopyButton";
 import {
   ProbabilisticSection,
   RecommendationsSection,
@@ -12,9 +13,28 @@ import {
   AntifragilitySection,
 } from "./sections/AnalysisSections";
 
+function SectionWrapper({ num, title, tooltip, children, defaultOpen = true, copyText }) {
+  const [open, setOpen] = useState(defaultOpen);
+  return (
+    <div className="section" style={{ animationDelay: `${0.05 + num * 0.05}s` }}>
+      <div className="section-header section-header-interactive" onClick={() => setOpen(!open)}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flex: 1 }}>
+          <span className="section-num">{String(num).padStart(2, '0')}</span>
+          <span className="section-title">{title}</span>
+          <HelpIcon small tooltip={tooltip} />
+        </div>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+          {copyText && <span onClick={e => e.stopPropagation()}><CopyButton text={copyText} label={`Copy ${title}`} /></span>}
+          <span className={`section-chevron ${open ? 'open' : ''}`}>▼</span>
+        </div>
+      </div>
+      {open && <div className="section-body">{children}</div>}
+    </div>
+  );
+}
+
 export default function Results({ data, dilemma }) {
   const [viewMode, setViewMode] = useState('text');
-
   if (!data) return null;
 
   const {
@@ -96,12 +116,12 @@ export default function Results({ data, dilemma }) {
 
           {/* 01 Problem Framing */}
           {problemFraming?.hiddenAssumptions?.length > 0 && (
-            <div className="section" style={{ animationDelay: '0.1s' }}>
-              <div className="section-header">
-                <span className="section-num">01</span>
-                <span className="section-title">Problem Framing</span>
-                <HelpIcon small tooltip="The core decision and its underlying assumptions." />
-              </div>
+            <SectionWrapper
+              num={1}
+              title="Problem Framing"
+              tooltip="The core decision and its underlying assumptions."
+              copyText={problemFraming.hiddenAssumptions.join('\n')}
+            >
               <div className="card">
                 <div className="card-label">Hidden Assumptions</div>
                 {problemFraming.hiddenAssumptions.map((a, i) => (
@@ -111,17 +131,17 @@ export default function Results({ data, dilemma }) {
                   </div>
                 ))}
               </div>
-            </div>
+            </SectionWrapper>
           )}
 
           {/* 02 Constraints */}
           {constraints && (
-            <div className="section" style={{ animationDelay: '0.15s' }}>
-              <div className="section-header">
-                <span className="section-num">02</span>
-                <span className="section-title">Constraints</span>
-                <HelpIcon small tooltip="The hard limits and non-negotiables bounding this decision." />
-              </div>
+            <SectionWrapper
+              num={2}
+              title="Constraints"
+              tooltip="The hard limits and non-negotiables bounding this decision."
+              copyText={Object.entries(constraints).map(([k, v]) => `${k}: ${v}`).join('\n')}
+            >
               <div className="cards-grid">
                 {Object.entries(constraints).map(([k, v]) => (
                   <div key={k} className="card">
@@ -130,7 +150,7 @@ export default function Results({ data, dilemma }) {
                   </div>
                 ))}
               </div>
-            </div>
+            </SectionWrapper>
           )}
 
           {/* 03 Risk */}
@@ -138,12 +158,12 @@ export default function Results({ data, dilemma }) {
 
           {/* 04 Opportunity Cost */}
           {opportunityCost && (
-            <div className="section" style={{ animationDelay: '0.25s' }}>
-              <div className="section-header">
-                <span className="section-num">04</span>
-                <span className="section-title">Opportunity Cost</span>
-                <HelpIcon small tooltip="The value of the alternative paths you give up by making a choice." />
-              </div>
+            <SectionWrapper
+              num={4}
+              title="Opportunity Cost"
+              tooltip="The value of the alternative paths you give up by making a choice."
+              copyText={Object.entries(opportunityCost).map(([k, v]) => `${k}: ${v}`).join('\n')}
+            >
               <div className="cards-grid">
                 {Object.entries(opportunityCost).map(([k, v]) => (
                   <div key={k} className="card">
@@ -152,7 +172,7 @@ export default function Results({ data, dilemma }) {
                   </div>
                 ))}
               </div>
-            </div>
+            </SectionWrapper>
           )}
 
           {/* 05 Skill Delta */}

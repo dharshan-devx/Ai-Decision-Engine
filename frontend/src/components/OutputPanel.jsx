@@ -3,6 +3,7 @@ import { useEffect, useRef } from "react";
 import ErrorBoundary from "./ErrorBoundary";
 import Results from "./Results";
 import FollowUp from "./FollowUp";
+import NeuralBrain from "./NeuralBrain";
 import { LOADING_STEPS } from "../hooks/useDecisionEngine";
 
 export default function OutputPanel({ loading, loadingStep, result, error, dilemma, apiKey, onShare, onExportPDF }) {
@@ -29,23 +30,28 @@ export default function OutputPanel({ loading, loadingStep, result, error, dilem
       )}
 
       {loading && (
-        <div className="loading-state" ref={loadingRef}>
-          {/* Progress steps */}
-          <div className="loading-progress">
-            <div className="spinner" />
-            <div className="loading-title">Processing decision structure</div>
-            <div className="loading-steps">
+        <div className="loading-brain-state" ref={loadingRef}>
+          <NeuralBrain />
+          <div className="loading-brain-steps">
+            <div className="loading-brain-title">Processing Decision Structure</div>
+            <div className="loading-steps-list">
               {LOADING_STEPS.map((step, i) => (
                 <div
                   key={i}
-                  className={`loading-step${i === loadingStep ? " active" : i < loadingStep ? " done" : ""}`}
+                  className={`loading-step-item${i === loadingStep ? " active" : i < loadingStep ? " done" : ""}`}
                 >
-                  <span className="step-icon">
-                    {i < loadingStep ? "✓" : i === loadingStep ? "›" : "·"}
+                  <span className="step-indicator">
+                    {i < loadingStep ? "✓" : i === loadingStep ? "●" : "○"}
                   </span>
-                  {step}
+                  <span className="step-label">{step}</span>
                 </div>
               ))}
+            </div>
+            <div className="loading-progress-bar">
+              <div
+                className="loading-progress-fill"
+                style={{ width: `${((loadingStep + 1) / LOADING_STEPS.length) * 100}%` }}
+              />
             </div>
           </div>
         </div>

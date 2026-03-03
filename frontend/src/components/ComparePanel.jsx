@@ -1,8 +1,8 @@
 "use client";
 import { useState, useEffect } from "react";
 import { analyzeDecision } from "../lib/api";
-import OutputPanel from "./OutputPanel";
 import HelpIcon from "./HelpIcon";
+import NeuralBrain from "./NeuralBrain";
 
 export default function ComparePanel({ saveAnalysis, restoreData, age, riskProfile, timeHorizon }) {
     const [dilemmaA, setDilemmaA] = useState("");
@@ -73,171 +73,243 @@ export default function ComparePanel({ saveAnalysis, restoreData, age, riskProfi
         }
     };
 
+    const getScoreColor = (score) => {
+        if (score >= 70) return "var(--green)";
+        if (score >= 40) return "var(--orange)";
+        return "var(--red)";
+    };
+
     const renderCompactResult = (result) => {
         if (!result) return null;
         return (
-            <div className="compare-result">
+            <div className="cmp-result">
                 {/* Core Decision */}
-                <div className="compare-card">
-                    <div className="card-label">Core Decision</div>
-                    <div className="card-value">{result.problemFraming?.coreDecision}</div>
-                </div>
-                <div className="compare-card">
-                    <div className="card-label">Type</div>
-                    <div className="card-value">{result.problemFraming?.decisionType}</div>
+                <div className="cmp-card cmp-card-highlight">
+                    <div className="cmp-card-label">Core Decision</div>
+                    <div className="cmp-card-value">{result.problemFraming?.coreDecision}</div>
+                    <div className="cmp-card-meta">{result.problemFraming?.decisionType}</div>
                 </div>
 
-                {/* Confidence */}
-                <div className="compare-card">
-                    <div className="card-label">Confidence</div>
-                    <div className="compare-big-num" style={{ color: "var(--accent)" }}>
-                        {result.confidenceScore}<span style={{ fontSize: 14, color: "var(--text-muted)" }}>/100</span>
+                {/* Confidence Score */}
+                <div className="cmp-card cmp-card-score">
+                    <div className="cmp-card-label">Confidence Score</div>
+                    <div className="cmp-score-display">
+                        <div className="cmp-score-number" style={{ color: getScoreColor(result.confidenceScore) }}>
+                            {result.confidenceScore}
+                        </div>
+                        <div className="cmp-score-bar">
+                            <div
+                                className="cmp-score-fill"
+                                style={{
+                                    width: `${result.confidenceScore}%`,
+                                    background: getScoreColor(result.confidenceScore)
+                                }}
+                            />
+                        </div>
                     </div>
                 </div>
 
                 {/* Risks */}
                 {result.riskAnalysis?.length > 0 && (
-                    <div className="compare-card">
-                        <div className="card-label">Top Risks</div>
-                        {result.riskAnalysis.slice(0, 3).map((r, i) => (
-                            <div key={i} className="compare-risk-row">
-                                <span>{r.name}</span>
-                                <span className={`risk-badge risk-${r.level}`}>{r.score}/100</span>
-                            </div>
-                        ))}
+                    <div className="cmp-card">
+                        <div className="cmp-card-label">Top Risks</div>
+                        <div className="cmp-risks">
+                            {[...result.riskAnalysis].sort((a, b) => b.score - a.score).slice(0, 3).map((r, i) => (
+                                <div key={i} className="cmp-risk-item">
+                                    <div className="cmp-risk-info">
+                                        <span className="cmp-risk-name">{r.name}</span>
+                                        <span className="cmp-risk-level" style={{ color: { high: "var(--red)", medium: "var(--orange)", low: "var(--green)" }[r.level] }}>{r.level}</span>
+                                    </div>
+                                    <div className="cmp-risk-bar-track">
+                                        <div className="cmp-risk-bar-fill" style={{
+                                            width: `${r.score}%`,
+                                            background: { high: "var(--red)", medium: "var(--orange)", low: "var(--green)" }[r.level]
+                                        }} />
+                                    </div>
+                                </div>
+                            ))}
+                        </div>
                     </div>
                 )}
 
-                {/* Recommended Path */}
+                {/* Strategic Paths */}
                 {result.strategicPaths?.length > 0 && (
-                    <div className="compare-card">
-                        <div className="card-label">Strategic Paths</div>
-                        {result.strategicPaths.map((p, i) => (
-                            <div key={i} className="compare-path-row">
-                                <span>{p.name} {p.recommended ? "✦" : ""}</span>
-                                <span className="compare-prob">{p.successProbability}%</span>
-                            </div>
-                        ))}
+                    <div className="cmp-card">
+                        <div className="cmp-card-label">Strategic Paths</div>
+                        <div className="cmp-paths">
+                            {result.strategicPaths.map((p, i) => (
+                                <div key={i} className={`cmp-path-item ${p.recommended ? "recommended" : ""}`}>
+                                    <div className="cmp-path-name">
+                                        {p.recommended && <span className="cmp-path-star">★</span>}
+                                        {p.name}
+                                    </div>
+                                    <div className="cmp-path-prob" style={{ color: p.successProbability >= 60 ? "var(--green)" : "var(--orange)" }}>
+                                        {p.successProbability}%
+                                    </div>
+                                </div>
+                            ))}
+                        </div>
                     </div>
                 )}
 
                 {/* Most Rational */}
                 {result.recommendations?.mostRational && (
-                    <div className="compare-card">
-                        <div className="card-label">Most Rational</div>
-                        <div className="card-value">{result.recommendations.mostRational.choice}</div>
+                    <div className="cmp-card cmp-card-rational">
+                        <div className="cmp-card-label">Most Rational Choice</div>
+                        <div className="cmp-card-value">{result.recommendations.mostRational.choice}</div>
+                        <div className="cmp-card-reasoning">{result.recommendations.mostRational.reasoning}</div>
                     </div>
                 )}
 
                 {/* Antifragility */}
                 {result.antifragilityScore && (
-                    <div className="compare-card">
-                        <div className="card-label">Antifragility</div>
-                        <div className="compare-big-num">{result.antifragilityScore.overall}<span style={{ fontSize: 14, color: "var(--text-muted)" }}>/100</span></div>
+                    <div className="cmp-card cmp-card-score">
+                        <div className="cmp-card-label">Antifragility</div>
+                        <div className="cmp-score-display">
+                            <div className="cmp-score-number">{result.antifragilityScore.overall || result.antifragilityScore}</div>
+                            <div className="cmp-score-bar">
+                                <div className="cmp-score-fill" style={{ width: `${result.antifragilityScore.overall || result.antifragilityScore}%` }} />
+                            </div>
+                        </div>
                     </div>
                 )}
             </div>
         );
     };
 
+    const winnerSide = resultA && resultB
+        ? resultA.confidenceScore > resultB.confidenceScore ? "A" : resultB.confidenceScore > resultA.confidenceScore ? "B" : null
+        : null;
+
     return (
-        <div className="compare-container">
-            <div className="compare-header-row" style={{ marginBottom: 20 }}>
-                <div className="form-field">
-                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 4 }}>
-                        <label className="field-label" style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-                            Custom Gemini API Key (Optional)
-                            <HelpIcon tooltip="Bring your own API key to bypass shared server rate limits and route heavy analysis directly through your private quota." />
-                        </label>
-                        <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                            <span style={{ color: 'var(--green)', fontSize: '9px', textTransform: 'uppercase', letterSpacing: '0.05em', border: '1px solid var(--green-dim)', padding: '2px 6px', borderRadius: '4px', background: 'var(--surface2)' }}>Bypasses Global Limits</span>
-                            <a href="https://aistudio.google.com/api-keys" target="_blank" rel="noopener noreferrer" style={{ display: 'flex', alignItems: 'center', gap: '4px', color: 'var(--accent)', fontSize: '11px', textDecoration: 'none', background: 'var(--surface2)', padding: '3px 8px', borderRadius: '4px', border: '1px solid var(--border)' }}>
-                                Get Key
-                                <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path><polyline points="15 3 21 3 21 9"></polyline><line x1="10" y1="14" x2="21" y2="3"></line></svg>
-                            </a>
-                        </div>
+        <div className="cmp-container">
+            {/* API Key Section */}
+            <div className="cmp-apikey-section">
+                <div className="cmp-apikey-header">
+                    <label className="field-label" style={{ display: 'flex', alignItems: 'center', gap: 8, margin: 0 }}>
+                        Custom Gemini API Key
+                        <HelpIcon tooltip="Bring your own API key to bypass shared server rate limits." />
+                    </label>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                        <span className="cmp-badge-green">Bypasses Limits</span>
+                        <a href="https://aistudio.google.com/api-keys" target="_blank" rel="noopener noreferrer" className="cmp-getkey-link">
+                            Get Key ↗
+                        </a>
                     </div>
-                    <input
-                        className="field-input"
-                        type="password"
-                        placeholder="AIzA..."
-                        value={apiKey}
-                        onChange={(e) => setApiKey(e.target.value)}
-                    />
                 </div>
+                <input
+                    className="field-input"
+                    type="password"
+                    placeholder="AIzA..."
+                    value={apiKey}
+                    onChange={(e) => setApiKey(e.target.value)}
+                />
             </div>
-            <div className="compare-grid">
+
+            {/* Compare Grid */}
+            <div className="cmp-grid">
                 {/* Side A */}
-                <div className="compare-side">
-                    <div className="compare-side-label" style={{ display: 'flex', alignItems: 'center' }}>
-                        Decision A
-                        <HelpIcon tooltip="The exact first option you are considering. Evaluated holistically head-to-head against Decision B." />
+                <div className={`cmp-side ${winnerSide === "A" ? "cmp-winner" : ""}`}>
+                    <div className="cmp-side-header">
+                        <div className="cmp-side-badge cmp-side-a">A</div>
+                        <span className="cmp-side-title">Decision A</span>
+                        <HelpIcon tooltip="The first option you are considering." />
                     </div>
                     <textarea
-                        className="compare-textarea"
-                        placeholder="Describe decision A..."
+                        className="cmp-textarea"
+                        placeholder="Describe your first option in detail..."
                         value={dilemmaA}
                         onChange={(e) => setDilemmaA(e.target.value)}
-                        rows={3}
+                        rows={4}
                     />
-
                     <button
-                        className="analyze-btn"
+                        className="cmp-analyze-btn"
                         onClick={() => runAnalysis("A")}
                         disabled={!dilemmaA.trim() || loadingA}
-                        style={{ marginTop: 12 }}
                     >
-                        {loadingA ? "Analyzing…" : "⚡ Analyze A"}
+                        {loadingA ? (
+                            <><div className="spinner" style={{ width: 14, height: 14 }} /> Analyzing...</>
+                        ) : (
+                            <><span className="cmp-bolt">⚡</span> Analyze A</>
+                        )}
                     </button>
-                    {loadingA && <div className="compare-loading"><div className="spinner" />Analyzing...</div>}
+                    {loadingA && (
+                        <div className="cmp-loading">
+                            <NeuralBrain />
+                        </div>
+                    )}
                     {renderCompactResult(resultA)}
                 </div>
 
-                {/* Divider */}
-                <div className="compare-divider">
-                    <div className="compare-vs">VS</div>
+                {/* VS Divider */}
+                <div className="cmp-divider">
+                    <div className="cmp-divider-line" />
+                    <div className="cmp-vs">VS</div>
+                    <div className="cmp-divider-line" />
                 </div>
 
                 {/* Side B */}
-                <div className="compare-side">
-                    <div className="compare-side-label" style={{ display: 'flex', alignItems: 'center' }}>
-                        Decision B
-                        <HelpIcon tooltip="The primary alternative route. Systematically compared to finding the objectively superior choice." />
+                <div className={`cmp-side ${winnerSide === "B" ? "cmp-winner" : ""}`}>
+                    <div className="cmp-side-header">
+                        <div className="cmp-side-badge cmp-side-b">B</div>
+                        <span className="cmp-side-title">Decision B</span>
+                        <HelpIcon tooltip="The alternative route to compare against." />
                     </div>
                     <textarea
-                        className="compare-textarea"
-                        placeholder="Describe decision B..."
+                        className="cmp-textarea"
+                        placeholder="Describe your second option in detail..."
                         value={dilemmaB}
                         onChange={(e) => setDilemmaB(e.target.value)}
-                        rows={3}
+                        rows={4}
                     />
                     <button
-                        className="analyze-btn"
+                        className="cmp-analyze-btn"
                         onClick={() => runAnalysis("B")}
                         disabled={!dilemmaB.trim() || loadingB}
-                        style={{ marginTop: 12 }}
                     >
-                        {loadingB ? "Analyzing…" : "⚡ Analyze B"}
+                        {loadingB ? (
+                            <><div className="spinner" style={{ width: 14, height: 14 }} /> Analyzing...</>
+                        ) : (
+                            <><span className="cmp-bolt">⚡</span> Analyze B</>
+                        )}
                     </button>
-                    {loadingB && <div className="compare-loading"><div className="spinner" />Analyzing...</div>}
+                    {loadingB && (
+                        <div className="cmp-loading">
+                            <NeuralBrain />
+                        </div>
+                    )}
                     {renderCompactResult(resultB)}
                 </div>
             </div>
 
+            {/* Comparison Synthesis */}
             {resultA && resultB && (
-                <div className="compare-synthesis" style={{ marginTop: 24, padding: 20, background: "var(--surface-light)", borderRadius: 12, border: "1px solid var(--border)" }}>
-                    <div className="panel-title" style={{ marginBottom: 16 }}>Comparison Synthesis</div>
-                    <p style={{ color: "var(--text-secondary)", lineHeight: 1.6 }}>
-                        <strong>Decision A Confidence:</strong> {resultA.confidenceScore}/100 <br />
-                        <strong>Decision B Confidence:</strong> {resultB.confidenceScore}/100 <br /><br />
-                        {resultA.confidenceScore > resultB.confidenceScore
-                            ? "Decision A generally models higher probabilistic certainty and alignment with constraints."
-                            : resultB.confidenceScore > resultA.confidenceScore
-                                ? "Decision B generally models higher probabilistic certainty and alignment with constraints."
-                                : "Both paths model similar confidence scores. Consider antifragility and personal preference as tie-breakers."}
-                        <br /><br />
-                        Full comparison data has been stored in your analysis history.
-                    </p>
+                <div className="cmp-synthesis">
+                    <div className="cmp-synthesis-header">
+                        <span className="cmp-synthesis-icon">⚖️</span>
+                        <span className="cmp-synthesis-title">Comparison Verdict</span>
+                    </div>
+                    <div className="cmp-synthesis-scores">
+                        <div className={`cmp-score-card ${winnerSide === "A" ? "winner" : ""}`}>
+                            <div className="cmp-score-card-label">Decision A</div>
+                            <div className="cmp-score-card-num" style={{ color: getScoreColor(resultA.confidenceScore) }}>
+                                {resultA.confidenceScore}<span>/100</span>
+                            </div>
+                        </div>
+                        <div className="cmp-score-vs">vs</div>
+                        <div className={`cmp-score-card ${winnerSide === "B" ? "winner" : ""}`}>
+                            <div className="cmp-score-card-label">Decision B</div>
+                            <div className="cmp-score-card-num" style={{ color: getScoreColor(resultB.confidenceScore) }}>
+                                {resultB.confidenceScore}<span>/100</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div className="cmp-synthesis-verdict">
+                        {winnerSide
+                            ? `Decision ${winnerSide} models higher probabilistic certainty and strategic alignment. Review the risk analysis and antifragility scores above for nuanced differences.`
+                            : "Both paths model equal confidence. Consider antifragility scores, risk profiles, and personal values as decisive factors."
+                        }
+                    </div>
                 </div>
             )}
 
@@ -249,4 +321,3 @@ export default function ComparePanel({ saveAnalysis, restoreData, age, riskProfi
         </div>
     );
 }
-

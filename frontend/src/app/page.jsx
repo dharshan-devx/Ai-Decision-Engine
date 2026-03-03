@@ -8,6 +8,9 @@ import ComparePanel from "../components/ComparePanel";
 import Toast from "../components/Toast";
 import PrintTemplate from "../components/PrintTemplate";
 import ErrorBoundary from "../components/ErrorBoundary";
+
+import TextToSpeech from "../components/TextToSpeech";
+import OnboardingTour from "../components/OnboardingTour";
 import { useDecisionEngine } from "../hooks/useDecisionEngine";
 import { useHistory } from "../hooks/useHistory";
 import LZString from "lz-string";
@@ -23,6 +26,7 @@ export default function App() {
   const [printMode, setPrintMode] = useState(false);
   const resultsRef = useRef(null);
   const [showScrollTop, setShowScrollTop] = useState(false);
+
 
   // Fix scroll position on reload
   useEffect(() => {
@@ -53,6 +57,7 @@ export default function App() {
         timeHorizon: engine.timeHorizon,
         data: engine.result,
       });
+
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [engine.result]);
@@ -221,6 +226,44 @@ export default function App() {
     }
   }, [engine.result, engine.dilemma]);
 
+  const handleExportMarkdown = useCallback(async () => {
+    if (!engine.result) {
+      setToast("No analysis to export.");
+      return;
+    }
+    try {
+      const { default: generateMarkdown } = await import("../lib/generateMarkdown");
+      generateMarkdown(engine.result, engine.dilemma);
+      setToast("✅ Markdown downloaded!");
+    } catch (e) {
+      console.error("Markdown export failed:", e);
+      setToast("Export failed. Please try again.");
+    }
+  }, [engine.result, engine.dilemma]);
+
+  // Keyboard shortcuts
+  useEffect(() => {
+    const handleKeyDown = (e) => {
+      // Ctrl+Enter = Analyze
+      if (e.ctrlKey && e.key === "Enter") {
+        e.preventDefault();
+        engine.handleAnalyze();
+      }
+      // Ctrl+Shift+S = Share
+      if (e.ctrlKey && e.shiftKey && (e.key === "S" || e.key === "s")) {
+        e.preventDefault();
+        handleShare();
+      }
+      // Ctrl+Shift+P = Export PDF
+      if (e.ctrlKey && e.shiftKey && (e.key === "P" || e.key === "p")) {
+        e.preventDefault();
+        handleExportPDF();
+      }
+    };
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, [engine.handleAnalyze, handleShare, handleExportPDF]);
+
   if (printMode) {
     return (
       <div className="pdf-export" style={{ background: '#0a0a08', minHeight: '100vh', padding: '40px' }}>
@@ -271,12 +314,16 @@ export default function App() {
           {/* Global Action Buttons */}
           {engine.result && !engine.loading && (
             <div className="result-actions global-actions">
-              <button className="result-action-btn" onClick={handleExportPDF} title="Export as PDF">
+              <button className="result-action-btn" onClick={handleExportPDF} title="Export as PDF (Ctrl+Shift+P)">
                 📄 Export PDF
               </button>
-              <button className="result-action-btn" onClick={handleShare} title="Share Analysis">
+              <button className="result-action-btn" onClick={handleExportMarkdown} title="Export as Markdown">
+                📝 Markdown
+              </button>
+              <button className="result-action-btn" onClick={handleShare} title="Share Analysis (Ctrl+Shift+S)">
                 🔗 Share
               </button>
+              <TextToSpeech data={engine.result} dilemma={engine.dilemma} />
             </div>
           )}
           <div ref={resultsRef}>
@@ -306,6 +353,9 @@ export default function App() {
         }
 
         {toast && <Toast message={toast} onClose={() => setToast(null)} />}
+
+
+        <OnboardingTour />
 
         <button
           className={`scroll-top-btn ${showScrollTop ? 'visible' : ''}`}
