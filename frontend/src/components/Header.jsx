@@ -4,6 +4,8 @@ import api from "../lib/api";
 import NeuralBrain from "./NeuralBrain";
 import AboutModal from "./AboutModal";
 
+const ONBOARDING_KEY = "de_onboarding_done";
+
 export default function Header({ showHistory, setShowHistory, compareMode, setCompareMode }) {
   const [apiActive, setApiActive] = useState(true);
   const [aboutOpen, setAboutOpen] = useState(false);
@@ -12,6 +14,16 @@ export default function Header({ showHistory, setShowHistory, compareMode, setCo
     if (typeof window !== "undefined") {
       document.documentElement.setAttribute("data-theme", "dark");
       localStorage.setItem("de-theme", "dark");
+    }
+  }, []);
+
+  // Auto-open AboutModal for first-time users
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    const done = localStorage.getItem(ONBOARDING_KEY);
+    if (!done) {
+      const timer = setTimeout(() => setAboutOpen(true), 800);
+      return () => clearTimeout(timer);
     }
   }, []);
 
@@ -70,7 +82,7 @@ export default function Header({ showHistory, setShowHistory, compareMode, setCo
           {apiActive === "active" ? "AI Layer Active" : apiActive === "quota_exceeded" ? "API Quota Exceeded" : apiActive === "unknown" ? "AI Layer Standby" : "AI Layer Offline"}
         </div>
       </div>
-      <AboutModal isOpen={aboutOpen} onClose={() => setAboutOpen(false)} />
+      <AboutModal isOpen={aboutOpen} onClose={() => { setAboutOpen(false); localStorage.setItem(ONBOARDING_KEY, "true"); }} />
     </header>
   );
 }

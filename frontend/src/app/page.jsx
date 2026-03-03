@@ -10,7 +10,7 @@ import PrintTemplate from "../components/PrintTemplate";
 import ErrorBoundary from "../components/ErrorBoundary";
 
 import TextToSpeech from "../components/TextToSpeech";
-import OnboardingTour from "../components/OnboardingTour";
+
 import { useDecisionEngine } from "../hooks/useDecisionEngine";
 import { useHistory } from "../hooks/useHistory";
 import LZString from "lz-string";
@@ -361,7 +361,6 @@ export default function App() {
         {toast && <Toast message={toast} onClose={() => setToast(null)} />}
 
 
-        <OnboardingTour />
 
         <button
           className={`scroll-top-btn ${showScrollTop ? 'visible' : ''}`}
