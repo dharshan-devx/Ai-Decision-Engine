@@ -95,5 +95,15 @@ export async function getSharedAnalysis(id) {
   return data;
 }
 
+export async function trackVisit(visitorId) {
+  const { data } = await api.post("/stats/visit", { visitor_id: visitorId });
+  return data;
+}
+
+export async function getSiteStats() {
+  const { data } = await api.get("/stats");
+  return data;
+}
+
 export default api;
 

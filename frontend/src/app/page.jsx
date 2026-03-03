@@ -14,7 +14,7 @@ import TextToSpeech from "../components/TextToSpeech";
 import { useDecisionEngine } from "../hooks/useDecisionEngine";
 import { useHistory } from "../hooks/useHistory";
 import LZString from "lz-string";
-import { createShareLink, getSharedAnalysis } from "../lib/api";
+import { createShareLink, getSharedAnalysis, trackVisit, getSiteStats } from "../lib/api";
 
 export default function App() {
   const engine = useDecisionEngine();
@@ -26,6 +26,7 @@ export default function App() {
   const [printMode, setPrintMode] = useState(false);
   const resultsRef = useRef(null);
   const [showScrollTop, setShowScrollTop] = useState(false);
+  const [siteStats, setSiteStats] = useState(null);
 
 
   // Fix scroll position on reload
@@ -41,6 +42,27 @@ export default function App() {
     const handleScroll = () => setShowScrollTop(window.scrollY > 300);
     window.addEventListener("scroll", handleScroll);
     return () => window.removeEventListener("scroll", handleScroll);
+  }, []);
+
+  // Anonymous visitor tracking
+  useEffect(() => {
+    const track = async () => {
+      try {
+        let vid = localStorage.getItem("de_visitor_id");
+        if (!vid) {
+          vid = crypto.randomUUID();
+          localStorage.setItem("de_visitor_id", vid);
+        }
+        const result = await trackVisit(vid);
+        if (result) setSiteStats(result);
+      } catch {
+        try {
+          const stats = await getSiteStats();
+          if (stats) setSiteStats(stats);
+        } catch { /* silent */ }
+      }
+    };
+    track();
   }, []);
 
   const scrollToTop = () => {
@@ -387,6 +409,11 @@ export default function App() {
               </a>
             </span>
           </div>
+          {siteStats && (
+            <span className="footer-stats">
+              👁 {siteStats.total_visits.toLocaleString()} visits · {siteStats.unique_users.toLocaleString()} users
+            </span>
+          )}
         </footer>
       </div >
     </ErrorBoundary>
