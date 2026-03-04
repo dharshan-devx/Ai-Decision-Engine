@@ -6,7 +6,40 @@ import AboutModal from "./AboutModal";
 
 const ONBOARDING_KEY = "de_onboarding_done";
 
-export default function Header({ showHistory, setShowHistory, compareMode, setCompareMode, siteStats, loading }) {
+// Helper for real-time count animation
+function AnimatedNumber({ value }) {
+  const [displayValue, setDisplayValue] = useState(0);
+
+  useEffect(() => {
+    let start = displayValue;
+    const end = parseInt(value);
+    if (start === end) return;
+
+    const duration = 500; // Snappier 0.5s animation
+    const startTime = performance.now();
+
+    const animate = (currentTime) => {
+      const elapsed = currentTime - startTime;
+      const progress = Math.min(elapsed / duration, 1);
+
+      // Smooth easing
+      const easeProgress = 1 - Math.pow(1 - progress, 4);
+      const current = Math.floor(start + (end - start) * easeProgress);
+
+      setDisplayValue(current);
+
+      if (progress < 1) {
+        requestAnimationFrame(animate);
+      }
+    };
+
+    requestAnimationFrame(animate);
+  }, [value]);
+
+  return <span className="stats-value">{displayValue.toLocaleString()}</span>;
+}
+
+export default function Header({ siteStats, loading }) {
   const [apiActive, setApiActive] = useState(true);
   const [aboutOpen, setAboutOpen] = useState(false);
 
@@ -38,17 +71,17 @@ export default function Header({ showHistory, setShowHistory, compareMode, setCo
     };
 
     checkHealth();
-    const interval = setInterval(checkHealth, 60000); // 60s
+    const interval = setInterval(checkHealth, 30000); // 30s
     return () => clearInterval(interval);
   }, []);
-
-
 
   return (
     <header className="header">
       <div className="header-left">
-        <span className="logo">Decision Engine</span>
-        <span className="logo-sub">Strategic Reasoning System</span>
+        <div className="logo-group">
+          <span className="logo">Decision Engine</span>
+          <span className="logo-sub">Strategic Reasoning System</span>
+        </div>
       </div>
       <div
         className="header-center"
@@ -59,43 +92,28 @@ export default function Header({ showHistory, setShowHistory, compareMode, setCo
         <NeuralBrain isLoading={loading} style={{ width: '40px', height: '40px', background: 'transparent' }} />
       </div>
       <div className="header-right">
-
-        <button
-          className={`header-icon-btn ${compareMode ? "active" : ""}`}
-          onClick={() => setCompareMode(!compareMode)}
-          title={compareMode ? "Single Mode" : "Compare Mode"}
-          style={{ display: 'flex', alignItems: 'center', justifyContent: 'center' }}
-        >
-          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M16 3h5v5"></path><path d="M8 3H3v5"></path><path d="M12 22v-8.3a4 4 0 0 0-1.17-2.83V11"></path><path d="m3 3 7.53 7.53"></path><path d="m21 3-7.53 7.53"></path></svg>
-        </button>
-        <button
-          className="header-icon-btn"
-          onClick={() => setShowHistory(!showHistory)}
-          title="History"
-          style={{ display: 'flex', alignItems: 'center', justifyContent: 'center' }}
-        >
-          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>
-        </button>
         <div className="gemini-badge">
           <svg className="gemini-icon" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
             <path d="M12 2L14.85 9.15L22 12L14.85 14.85L12 22L9.15 14.85L2 12L9.15 9.15L12 2Z" fill="currentColor" />
           </svg>
           <span className="gemini-text">Powered by Gemini</span>
         </div>
-        <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: '4px' }}>
+        <div className="header-status-group">
           <div className="header-status">
-            <div className={apiActive === "active" ? "status-dot" : apiActive === "quota_exceeded" ? "status-dot-quota" : apiActive === "unknown" ? "status-dot-unknown" : "status-dot-offline"} />
+            <div className={apiActive === "active" ? "status-dot status-pulse" : apiActive === "quota_exceeded" ? "status-dot-quota" : apiActive === "unknown" ? "status-dot-unknown" : "status-dot-offline"} />
             {apiActive === "active" ? "AI Layer Active" : apiActive === "quota_exceeded" ? "API Quota Exceeded" : apiActive === "unknown" ? "AI Layer Standby" : "AI Layer Offline"}
           </div>
           {siteStats && (
-            <div className="header-stats">
-              <svg className="stats-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+            <div className="stats-pill">
+              <svg className="stats-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
                 <path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z" />
                 <circle cx="12" cy="12" r="3" />
               </svg>
-              <span className="stats-text">
-                {siteStats.total_visits.toLocaleString()} visits <span className="stats-divider">·</span> {siteStats.unique_users.toLocaleString()} users
-              </span>
+              <div className="stats-text">
+                <AnimatedNumber value={siteStats.total_visits} /> <span className="stats-label">VISITS</span>
+                <span className="stats-divider">·</span>
+                <AnimatedNumber value={siteStats.unique_users} /> <span className="stats-label">USERS</span>
+              </div>
             </div>
           )}
         </div>

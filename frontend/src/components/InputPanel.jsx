@@ -100,7 +100,7 @@ export default function InputPanel({
         </div>
         <div style={{ gridColumn: "1 / -1" }}>
           <div className="field-label" style={{ display: 'flex', alignItems: 'center' }}>
-            Custom Gemini API Key (Optional)
+            Gemini API Key (Required)
             <HelpIcon tooltip="Bring your own API key to bypass shared server rate limits and route heavy analysis directly through your private quota." />
             <div style={{ marginLeft: 'auto', display: 'flex', alignItems: 'center', gap: '8px' }}>
               <span style={{ color: 'var(--green)', fontSize: '9px', textTransform: 'uppercase', letterSpacing: '0.05em', border: '1px solid var(--green-dim)', padding: '2px 6px', borderRadius: '4px', background: 'var(--surface2)' }}>Bypasses Global Limits</span>
@@ -113,7 +113,7 @@ export default function InputPanel({
           <input
             className="field-input"
             type="password"
-            placeholder="sk-..."
+            placeholder="AIza..."
             value={apiKey}
             onChange={(e) => setApiKey(e.target.value)}
           />
@@ -123,7 +123,7 @@ export default function InputPanel({
       <button
         className="analyze-btn"
         onClick={onAnalyze}
-        disabled={!dilemma.trim() || loading}
+        disabled={!dilemma.trim() || !apiKey.trim() || loading}
       >
         {loading ? "Analyzing…" : "Run Strategic Analysis"}
       </button>

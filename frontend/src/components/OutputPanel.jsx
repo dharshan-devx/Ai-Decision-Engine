@@ -198,11 +198,21 @@ export default function OutputPanel({ loading, loadingStep, result, error, dilem
       )}
 
       {error && (
-        <div className="error-state">
-          <div style={{ marginBottom: 8, fontFamily: "var(--font-display)", fontSize: 16 }}>Analysis Error</div>
-          {error}
-          <div style={{ marginTop: 12, color: "var(--text-dim)" }}>
-            Check that the backend is running, your GEMINI_API_KEY is set, and you have sufficient API Quota.
+        <div className="error-container">
+          <div className="error-icon">⚠️</div>
+          <div className="error-content">
+            <h3 className="error-title">Strategic Engine Interruption</h3>
+            <p className="error-message">{error}</p>
+            <div className="error-actions">
+              <div className="error-tip">
+                <strong>Potential Solutions:</strong>
+                <ul>
+                  <li>Verify your internet connection.</li>
+                  <li>Ensure your API Key is valid and has remaining quota.</li>
+                  <li>Try simplifying your dilemma or providing more context.</li>
+                </ul>
+              </div>
+            </div>
           </div>
         </div>
       )}

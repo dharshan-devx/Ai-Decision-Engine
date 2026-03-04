@@ -8,8 +8,10 @@ import ComparePanel from "../components/ComparePanel";
 import Toast from "../components/Toast";
 import PrintTemplate from "../components/PrintTemplate";
 import ErrorBoundary from "../components/ErrorBoundary";
+import ApiKeyAlert from "../components/ApiKeyAlert";
 
 import TextToSpeech from "../components/TextToSpeech";
+import SidebarActions from "../components/SidebarActions";
 
 import { useDecisionEngine } from "../hooks/useDecisionEngine";
 import { useHistory } from "../hooks/useHistory";
@@ -27,6 +29,22 @@ export default function App() {
   const resultsRef = useRef(null);
   const [showScrollTop, setShowScrollTop] = useState(false);
   const [siteStats, setSiteStats] = useState(null);
+  const [showAlert, setShowAlert] = useState(false);
+  const [alertType, setAlertType] = useState("invalid"); // "invalid" or "quota"
+
+  // Monitor engine error for API key issues
+  useEffect(() => {
+    if (engine.error) {
+      const err = engine.error.toLowerCase();
+      if (err.includes("api key") || err.includes("invalid")) {
+        setAlertType("invalid");
+        setShowAlert(true);
+      } else if (err.includes("quota") || err.includes("limit") || err.includes("exhausted")) {
+        setAlertType("quota");
+        setShowAlert(true);
+      }
+    }
+  }, [engine.error]);
 
 
   // Fix scroll position on reload
@@ -44,8 +62,15 @@ export default function App() {
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
 
-  // Anonymous visitor tracking
+  // Anonymous visitor tracking with Real-time updates
   useEffect(() => {
+    const fetchStats = async () => {
+      try {
+        const stats = await getSiteStats();
+        if (stats) setSiteStats(stats);
+      } catch { /* silent */ }
+    };
+
     const track = async () => {
       try {
         let vid = localStorage.getItem("de_visitor_id");
@@ -56,13 +81,13 @@ export default function App() {
         const result = await trackVisit(vid);
         if (result) setSiteStats(result);
       } catch {
-        try {
-          const stats = await getSiteStats();
-          if (stats) setSiteStats(stats);
-        } catch { /* silent */ }
+        fetchStats();
       }
     };
+
     track();
+    const interval = setInterval(fetchStats, 10000); // 10s for "real-time" feel
+    return () => clearInterval(interval);
   }, []);
 
   const scrollToTop = () => {
@@ -303,12 +328,12 @@ export default function App() {
     <ErrorBoundary>
       <div className="app">
         <Header
-          showHistory={showHistory}
-          setShowHistory={setShowHistory}
-          compareMode={compareMode}
-          setCompareMode={setCompareMode}
           siteStats={siteStats}
           loading={engine.loading}
+        />
+        <SidebarActions
+          compareMode={compareMode} setCompareMode={setCompareMode}
+          showHistory={showHistory} setShowHistory={setShowHistory}
         />
 
         <div className="main" style={{ display: compareMode ? "block" : "none" }}>
@@ -383,6 +408,12 @@ export default function App() {
         }
 
         {toast && <Toast message={toast} onClose={() => setToast(null)} />}
+
+        <ApiKeyAlert
+          isOpen={showAlert}
+          onClose={() => setShowAlert(false)}
+          errorType={alertType}
+        />
 
 
 
