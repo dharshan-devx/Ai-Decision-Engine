@@ -96,7 +96,7 @@ export default function Header({ siteStats, loading }) {
           <svg className="gemini-icon" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
             <path d="M12 2L14.85 9.15L22 12L14.85 14.85L12 22L9.15 14.85L2 12L9.15 9.15L12 2Z" fill="currentColor" />
           </svg>
-          <span className="gemini-text">Powered by Gemini</span>
+          <span className="gemini-text">AI REASONING CORE</span>
         </div>
         <div className="header-status-group">
           <div className="header-status">
