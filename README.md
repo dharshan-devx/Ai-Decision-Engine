@@ -13,7 +13,7 @@ An advanced multi-agent AI framework engineered to structure complex life and st
 
 # 🌍 Live Architecture
 
-Frontend (Next.js) → FastAPI Backend → Gemini AI (Multi-Agent) → Supabase (PostgreSQL) → Playwright PDF Engine
+Frontend (Next.js) → FastAPI Backend → Gemini AI (Multi-Agent) → Neon (PostgreSQL) → Playwright PDF Engine
 
 ---
 
@@ -107,7 +107,7 @@ Both the **Visionary** and **Risk Manager** agents run concurrently via `asyncio
 | 19 | **Client-Side PDF Export** | Professional multi-page PDF generated via jsPDF with dark-theme styling, section headers, risk bars, and score displays |
 | 20 | **Server-Side PDF Export** | Playwright (Headless Chromium) renders pixel-perfect PDF replicas of the web analysis |
 | 21 | **Markdown Export** | Full 11-section structured Markdown export with tables, headers, and formatted data |
-| 22 | **Shareable Links** | One-click share creates a persistent link (backed by Supabase) that anyone can open to view the analysis |
+| 22 | **Shareable Links** | One-click share creates a persistent link (backed by Neon) that anyone can open to view the analysis |
 | 23 | **Copy-to-Clipboard** | Per-section copy buttons for quick extraction of individual analysis sections |
 
 ## 🧭 Navigation & UX
@@ -193,7 +193,7 @@ Both the **Visionary** and **Risk Manager** agents run concurrently via `asyncio
 - Google Gemini SDK (`gemini-2.5-flash`)
 - Anthropic Claude SDK (ready for multi-provider)
 - SQLAlchemy ORM
-- Supabase (PostgreSQL)
+- Neon (PostgreSQL)
 - Playwright (Headless Chromium for PDF Export)
 - PyMuPDF (PDF Document Parsing)
 
@@ -421,8 +421,8 @@ Create `.env`:
 
 ```
 GEMINI_API_KEY=your_key
-SUPABASE_URL=your_url
-SUPABASE_KEY=your_key
+Neon_URL=your_url
+Neon_KEY=your_key
 ALLOWED_ORIGINS=http://localhost:3000
 ```
 
@@ -490,8 +490,8 @@ uvicorn app.main:app --host 0.0.0.0 --port $PORT
 
 ```
 GEMINI_API_KEY=...
-SUPABASE_URL=...
-SUPABASE_KEY=...
+Neon_URL=...
+Neon_KEY=...
 ALLOWED_ORIGINS=https://your-vercel-domain.vercel.app
 ```
 
@@ -516,7 +516,7 @@ Deploy.
 - [ ] Submit a dilemma and confirm analysis renders correctly
 - [ ] Confirm request hits Render backend (check logs)
 - [ ] Confirm Gemini processes all three agents successfully
-- [ ] Confirm Supabase writes analysis record
+- [ ] Confirm Neon writes analysis record
 - [ ] Confirm JSON repair handles truncated output
 - [ ] Test PDF export (both client-side and server-side)
 - [ ] Test Markdown export downloads correctly
