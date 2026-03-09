@@ -95,6 +95,29 @@ const getNodeStyle = (label, description, index, total) => {
 export default function DecisionTree({ data }) {
     const [direction, setDirection] = useState('TB');
     const [hoveredNode, setHoveredNode] = useState(null);
+    const [isFullscreen, setIsFullscreen] = useState(false);
+    const containerRef = useRef(null);
+
+    const toggleFullscreen = useCallback(() => {
+        if (!containerRef.current) return;
+
+        if (!document.fullscreenElement) {
+            containerRef.current.requestFullscreen().catch((err) => {
+                console.error(`Error attempting to enable full-screen mode: ${err.message}`);
+            });
+        } else {
+            document.exitFullscreen();
+        }
+    }, []);
+
+    useEffect(() => {
+        const handleFullscreenChange = () => {
+            setIsFullscreen(!!document.fullscreenElement);
+        };
+
+        document.addEventListener('fullscreenchange', handleFullscreenChange);
+        return () => document.removeEventListener('fullscreenchange', handleFullscreenChange);
+    }, []);
 
     const initialNodes = useMemo(() => {
         if (!data?.decisionTree?.nodes) return [];
@@ -253,16 +276,19 @@ export default function DecisionTree({ data }) {
     const edgeCount = data.decisionTree.edges?.length || 0;
 
     return (
-        <div style={{
-            width: "100%",
-            height: "700px",
-            borderRadius: "16px",
-            overflow: "hidden",
-            background: "linear-gradient(135deg, #0a0a1a 0%, #0d0d1f 50%, #0a0a1a 100%)",
-            border: "1px solid rgba(255, 161, 22, 0.1)",
-            boxShadow: "0 8px 32px rgba(0,0,0,0.4), inset 0 0 60px rgba(255, 161, 22, 0.02)",
-            position: "relative",
-        }}>
+        <div 
+            ref={containerRef}
+            style={{
+                width: "100%",
+                height: isFullscreen ? "100vh" : "700px",
+                borderRadius: isFullscreen ? "0px" : "16px",
+                overflow: "hidden",
+                background: "linear-gradient(135deg, #0a0a1a 0%, #0d0d1f 50%, #0a0a1a 100%)",
+                border: isFullscreen ? "none" : "1px solid rgba(255, 161, 22, 0.1)",
+                boxShadow: isFullscreen ? "none" : "0 8px 32px rgba(0,0,0,0.4), inset 0 0 60px rgba(255, 161, 22, 0.02)",
+                position: "relative",
+            }}
+        >
             {/* SVG Gradient Definitions */}
             <svg style={{ position: 'absolute', width: 0, height: 0 }}>
                 <defs>
@@ -382,6 +408,26 @@ export default function DecisionTree({ data }) {
                                 title="Horizontal layout"
                             >
                                 ↔ Horizontal
+                            </button>
+                            <div style={{ width: '1px', background: 'rgba(255, 255, 255, 0.1)', margin: '4px 2px' }} />
+                            <button
+                                onClick={toggleFullscreen}
+                                style={{
+                                    padding: '6px 12px',
+                                    borderRadius: '7px',
+                                    border: 'none',
+                                    background: isFullscreen ? 'rgba(255, 161, 22, 0.2)' : 'transparent',
+                                    color: isFullscreen ? '#ffa116' : '#6b7280',
+                                    fontSize: '11px',
+                                    fontWeight: 600,
+                                    cursor: 'pointer',
+                                    transition: 'all 0.2s',
+                                    fontFamily: "'Inter', sans-serif",
+                                    letterSpacing: '0.02em',
+                                }}
+                                title={isFullscreen ? "Exit Full Screen" : "Full Screen"}
+                            >
+                                {isFullscreen ? 'Collapse ⛶' : 'Full Screen ⛶'}
                             </button>
                         </div>
 
