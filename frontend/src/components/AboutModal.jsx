@@ -43,7 +43,7 @@ export default function AboutModal({ isOpen, onClose }) {
                     </div>
                     <h2 className="about-title">Decision Engine</h2>
                     <p className="about-subtitle">AI-Powered Strategic Reasoning</p>
-                    <div className="about-version-badge">v2.0.0 &bull; Cognitive Model</div>
+                    <div className="about-version-badge">Strategic Intelligence Core</div>
                 </div>
 
                 <div className="about-tabs">
