@@ -1,6 +1,7 @@
 "use client";
 import HelpIcon from "./HelpIcon";
 import CustomSelect from "./CustomSelect";
+import VoiceInput from "./VoiceInput";
 
 const EXAMPLES = [
   "Should I prioritize building my own future in another city or country, even if it means being away from my parents when they’re slowly growing older?",
@@ -33,6 +34,10 @@ export default function InputPanel({
           value={dilemma}
           onChange={(e) => setDilemma(e.target.value)}
           rows={6}
+        />
+        <VoiceInput
+          onTranscript={(text) => setDilemma(prev => prev ? `${prev} ${text}` : text)}
+          language={language}
         />
       </div>
 
