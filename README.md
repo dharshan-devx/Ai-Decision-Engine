@@ -75,7 +75,7 @@ Both the **Visionary** and **Risk Manager** agents run concurrently via `asyncio
 | 2 | **11-Dimension Analysis** | Every decision is evaluated across 11 structured dimensions (see framework below) |
 | 3 | **AI Follow-Up Chat** | Context-aware follow-up Q&A system with smart suggestions based on your analysis |
 | 4 | **Custom JSON Schema Output** | Strict JSON schema enforcement ensures consistent, parseable AI outputs every time |
-| 5 | **Custom Stack-Based JSON Repair** | Multi-strategy parser fixes truncated/malformed LLM responses — guarantees valid JSON to frontend |
+| 5 | **Custom Stack-Based JSON Repair** | Multi-strategy parser fixes truncated/malformed LLM responses - guarantees valid JSON to frontend |
 | 6 | **Multi-Language Support** | Analysis output in English, Hindi (हिन्दी), and Telugu (తెలుగు) |
 | 7 | **Configurable Risk Profiles** | Conservative, Moderate, Aggressive, and Contrarian analysis modes |
 | 8 | **Time Horizon Calibration** | Short-term (1–2 yr), Medium-term (3–5 yr), Long-term (5–10+ yr) decision framing |
@@ -114,8 +114,8 @@ Both the **Visionary** and **Risk Manager** agents run concurrently via `asyncio
 
 | # | Feature | Description |
 |---|---------|-------------|
-| 24 | **Analysis History** | LocalStorage-backed history panel — revisit, restore, or delete past analyses |
-| 25 | **Compare Mode** | Side-by-side analysis comparison panel — run two dilemmas simultaneously and compare results |
+| 24 | **Analysis History** | LocalStorage-backed history panel - revisit, restore, or delete past analyses |
+| 25 | **Compare Mode** | Side-by-side analysis comparison panel - run two dilemmas simultaneously and compare results |
 | 26 | **Skeleton Loading Animation** | Multi-section skeleton loader with shimmer effect during analysis |
 | 27 | **Agent Loading Steps** | Real-time step-by-step progress indicators showing which AI agent is currently processing |
 | 28 | **Neural Brain Animation** | Animated SVG brain with orbital rings, traveling dots, and neural connections (speeds up during loading) |
@@ -131,9 +131,9 @@ Both the **Visionary** and **Risk Manager** agents run concurrently via `asyncio
 | # | Feature | Description |
 |---|---------|-------------|
 | 35 | **BYOK (Bring Your Own Key)** | Users can inject their own Gemini API key to bypass global rate limits entirely |
-| 36 | **Global Rate Limiter** | IP-based in-memory token bucket — 10 requests per 60s window |
+| 36 | **Global Rate Limiter** | IP-based in-memory token bucket - 10 requests per 60s window |
 | 37 | **PDF Export Rate Limiter** | Per-IP cooldown (10s) for PDF generation to prevent Chromium abuse |
-| 38 | **AI Status Health Monitor** | Event-driven health tracking (`active`, `quota_exceeded`, `offline`, `unknown`) — no polling API calls |
+| 38 | **AI Status Health Monitor** | Event-driven health tracking (`active`, `quota_exceeded`, `offline`, `unknown`) - no polling API calls |
 | 39 | **Quota Exceeded Alert** | Full-screen modal with step-by-step API key creation guide when quota is hit |
 | 40 | **Invalid Key Alert** | Clear error modal distinguishing invalid keys from exhausted quotas |
 | 41 | **Rate Limit Usage API** | `/api/usage` endpoint shows remaining requests for the current window |
@@ -143,7 +143,7 @@ Both the **Visionary** and **Risk Manager** agents run concurrently via `asyncio
 
 | # | Feature | Description |
 |---|---------|-------------|
-| 43 | **Anonymous Visitor Tracking** | UUID-based visitor identification (stored in localStorage) — no cookies, no personal data |
+| 43 | **Anonymous Visitor Tracking** | UUID-based visitor identification (stored in localStorage) - no cookies, no personal data |
 | 44 | **Site Visit Counter** | Real-time total visits and unique users displayed in the header with animated number transitions |
 | 45 | **Atomic Counter Increment** | Thread-safe atomic counter for concurrent visit tracking |
 
@@ -166,9 +166,9 @@ Both the **Visionary** and **Risk Manager** agents run concurrently via `asyncio
 | 53 | **Thread-Isolated PDF Generation** | Playwright runs via `asyncio.to_thread()` to avoid Windows async pipe crashes |
 | 54 | **Async Lock for Chromium** | `asyncio.Lock()` prevents multiple simultaneous browser launches |
 | 55 | **Structured Request Logging** | Every request logs method, path, status code, and duration in ms |
-| 56 | **Document Parser Service** | In-memory PDF/TXT extraction — no temp files touch disk |
+| 56 | **Document Parser Service** | In-memory PDF/TXT extraction - no temp files touch disk |
 | 57 | **Claude Integration (Reserved)** | Anthropic Claude module ready for multi-provider AI support |
-| 58 | **Auto Database Migration** | `Base.metadata.create_all()` on startup — tables auto-create |
+| 58 | **Auto Database Migration** | `Base.metadata.create_all()` on startup - tables auto-create |
 | 59 | **Print Template** | Server-rendered print-optimized template for Playwright PDF capture |
 | 60 | **Error Boundary** | React ErrorBoundary component catches and displays rendering failures gracefully |
 
@@ -312,10 +312,10 @@ Zero layout shift guaranteed.
 | 11 | Regret Minimization | At-80 analysis, primary regret risk, and final recommendation |
 
 **Bonus Outputs:**
-- `voiceBriefing` — 250–300 word empathetic mentor-style strategic oration
-- `confidenceScore` — Overall analysis confidence (0–100)
-- `confidenceNote` — Explanation of confidence level
-- `decisionTree` — Nodes and edges for interactive React Flow visualization
+- `voiceBriefing` - 250–300 word empathetic mentor-style strategic oration
+- `confidenceScore` - Overall analysis confidence (0–100)
+- `confidenceNote` - Explanation of confidence level
+- `decisionTree` - Nodes and edges for interactive React Flow visualization
 
 ---
 
@@ -539,7 +539,7 @@ Standard LLM:
 Decision Engine:
 > "Path A has 45% upside probability but 8/10 ruin risk. Path B maximizes long-term antifragility with 72% confidence."
 
-This is structured decision architecture — not conversation, but computation.
+This is structured decision architecture - not conversation, but computation.
 
 ---
 
