@@ -18,7 +18,7 @@ Welcome to the architectural overview of the **AI Decision Engine**. This docume
 ### **Backend (Server Layer)**
 - **Framework:** FastAPI (Python 3.10+)  
 - **AI Engine:** Google Gemini SDK (`gemini-2.5-flash`) executing 3 concurrent agent personas  
-- **Database:** Supabase (PostgreSQL) via SQLAlchemy ORM
+- **Database:** Neon (PostgreSQL) via SQLAlchemy ORM
 - **PDF Generation:** Playwright (Headless Chromium)  
 - **Analytics:** Anonymous UUID-based atomic counting
 
@@ -132,13 +132,13 @@ The repository is configured for clean deployment using:
 
 - **Vercel** → Frontend  
 - **Render** → Backend  
-- **Supabase** → Database
+- **Neon** → Database
 
 ---
 
-## 🔹 Deploying the Database (Supabase)
+## 🔹 Deploying the Database (Neon)
 
-1. Create a new Supabase PostgreSQL project.
+1. Create a new Neon PostgreSQL project.
 2. Execute the table creation (The backend's `Base.metadata.create_all` will automatically build the `analyses`, `site_visits`, and `site_stats` tables on first boot).
 3. Retrieve your `Database URL`.
 
@@ -159,8 +159,8 @@ Render uses `render.yaml` as infrastructure-as-code.
 
 ```text
 GEMINI_API_KEY = your_google_ai_studio_api_key
-SUPABASE_URL = your_database_reference_url
-SUPABASE_KEY = your_database_anon_key
+Neon_URL = your_database_reference_url
+Neon_KEY = your_database_anon_key
 ALLOWED_ORIGINS = https://your-vercel-domain.vercel.app
 ```
 
@@ -202,7 +202,7 @@ After global deployment:
 5. Confirm:
    - Request hits Render backend.
    - All 3 agents execute (watch the frontend loading steps).
-   - Response writes to Supabase (visible in History).
+   - Response writes to Neon (visible in History).
    - JSON repair logic handles the schema extraction seamlessly.
 6. Test Export PDF (Server-side) to verify Playwright launches properly.
 7. Test Follow-up Chat to confirm memory constraints bind properly to the dilemma context.
