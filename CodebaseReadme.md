@@ -26,11 +26,11 @@ Welcome to the architectural overview of the **AI Decision Engine**. This docume
 
 ## 🔥 Backend Architecture & Resilience  
 
-The backend is designed to be highly fault-tolerant, async-safe, and production-ready. During development, I encountered several complex issues related to asynchronous AI execution, JSON integrity, and headless browser concurrency — and resolved them systematically.
+The backend is designed to be highly fault-tolerant, async-safe, and production-ready. During development, I encountered several complex issues related to asynchronous AI execution, JSON integrity, and headless browser concurrency - and resolved them systematically.
 
 ### Key Edge Cases I Solved  
 
-### 1️⃣ AI JSON Truncation — Custom Stack Parser  
+### 1️⃣ AI JSON Truncation - Custom Stack Parser  
 
 **Problem:**  
 The LLM occasionally returned long outputs that were abruptly truncated mid-response, breaking strict JSON formatting. A direct `json.loads()` call would crash the server entirely.
@@ -45,7 +45,7 @@ The parser:
 - Replaces incomplete map keys with `null`.
 - Strips trailing commas.
 
-This guarantees that the React frontend always receives a valid `AnalyzeResponse` JSON object — even if the LLM output is partially cut off due to token limits.
+This guarantees that the React frontend always receives a valid `AnalyzeResponse` JSON object - even if the LLM output is partially cut off due to token limits.
 
 ---
 
@@ -220,4 +220,4 @@ This system is engineered to be:
 
 Every architectural decision prioritizes reliability, visual excellence, scalable cost-control, and production stability. 
 
-This is not a demo-level AI "wrapper" — it is a structured, decision-optimization engine built for real-world strategic computation.
+This is not a demo-level AI "wrapper" - it is a structured, decision-optimization engine built for real-world strategic computation.
