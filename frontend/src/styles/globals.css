@@ -2372,7 +2372,33 @@ input[type="number"] {
 }
 
 .history-clear-btn:hover {
-  background: var(--red-dim);
+    background: var(--red-dim);
+}
+
+.history-footer {
+    margin-top: auto;
+    padding: 24px;
+    border-top: 1px solid var(--glass-border);
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+    background: rgba(255, 161, 22, 0.02);
+}
+
+.history-footer-icon {
+    font-size: 14px;
+    color: var(--accent);
+    margin-top: 2px;
+    flex-shrink: 0;
+    opacity: 0.8;
+}
+
+.history-footer p {
+    font-size: 11px;
+    color: var(--text-dim);
+    line-height: 1.5;
+    margin: 0;
+    opacity: 0.8;
 }
 
 /* ── About Modal (Premium Interface) ─────────────────── */

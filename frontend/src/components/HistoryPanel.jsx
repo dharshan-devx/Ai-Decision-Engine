@@ -42,6 +42,10 @@ export default function HistoryPanel({ history, onSelect, onDelete, onClear, onC
                         ))}
                     </div>
                 )}
+                <div className="history-footer">
+                    <span className="history-footer-icon">🔒</span>
+                    <p>Your analysis history is stored locally in your browser and is never sent to our servers. Your data remains completely private.</p>
+                </div>
             </div>
         </div>
     );
