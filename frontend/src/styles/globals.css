@@ -450,7 +450,7 @@ body {
   background: var(--bg-accent);
   border: 1px solid var(--border);
   border-radius: var(--radius-lg);
-  padding: 32px;
+  padding: 24px;
   display: flex;
   flex-direction: column;
   gap: 20px;
@@ -685,7 +685,7 @@ input[type="number"] {
   font-size: 14px;
   line-height: 1.7;
   resize: none;
-  min-height: 100px;
+  min-height: 80px;
   width: 100%;
 }
 
@@ -5399,104 +5399,110 @@ input[type="number"] {
 
 /* ── Voice Input ─────────────────────────────────────── */
 .voice-input-container {
-  position: absolute;
-  right: 12px;
-  bottom: 12px;
-  display: flex;
-  align-items: center;
-  flex-direction: row-reverse;
-  /* Put text to the left of the button */
-  gap: 8px;
-  z-index: 10;
-  pointer-events: none;
-  /* Allow clicks to pass through container if not on elements */
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    margin-top: 12px;
+}
+
+.voice-input-controls {
+    display: flex;
+    align-items: center;
+    gap: 12px;
 }
 
 .voice-input-btn {
-  pointer-events: all;
-  background: rgba(20, 20, 20, 0.8);
-  backdrop-filter: blur(8px);
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  border-radius: 10px;
-  /* Matching theme */
-  width: 44px;
-  height: 44px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  color: var(--text-dim);
-  cursor: pointer;
-  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-  position: relative;
+    position: relative;
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid var(--border);
+    color: var(--text-dim);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    overflow: visible;
 }
 
 .voice-input-btn:hover {
-  background: rgba(255, 255, 255, 0.1);
-  border-color: var(--accent);
-  color: var(--accent);
-  transform: scale(1.05);
+    background: rgba(255, 255, 255, 0.1);
+    border-color: var(--accent);
+    color: var(--accent);
+    transform: translateY(-1px);
 }
 
 .voice-input-btn.listening {
-  background: var(--red-dim);
-  border-color: var(--red);
-  color: var(--red);
-  animation: glowPulseRed 2s infinite;
+    background: var(--accent-glow);
+    border-color: var(--accent);
+    color: var(--accent);
+    box-shadow: 0 0 20px var(--accent-glow);
+}
+
+.voice-pulse {
+    position: absolute;
+    inset: -4px;
+    border: 2px solid var(--accent);
+    border-radius: 50%;
+    opacity: 0;
+    animation: voicePulseBloom 2s infinite cubic-bezier(0.4, 0, 0.2, 1);
+    pointer-events: none;
+}
+
+@keyframes voicePulseBloom {
+    0% {
+        transform: scale(0.8);
+        opacity: 0;
+    }
+    50% {
+        opacity: 0.5;
+    }
+    100% {
+        transform: scale(1.4);
+        opacity: 0;
+    }
+}
+
+.listening-indicator {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 6px 14px;
+    background: rgba(255, 161, 22, 0.05);
+    border: 1px solid var(--accent-glow);
+    border-radius: 20px;
+    animation: fadeIn 0.3s ease-out;
+}
+
+.listening-dot {
+    width: 8px;
+    height: 8px;
+    background: var(--accent);
+    border-radius: 50%;
+    animation: listeningPulse 1.5s infinite ease-in-out;
+}
+
+@keyframes listeningPulse {
+    0%, 100% { transform: scale(0.8); opacity: 0.5; }
+    50% { transform: scale(1.2); opacity: 1; }
 }
 
 .listening-text {
-  font-family: var(--font-mono);
-  font-size: 9px;
-  text-transform: uppercase;
-  letter-spacing: 0.1em;
-  color: var(--red);
-  background: rgba(239, 71, 67, 0.1);
-  padding: 4px 8px;
-  border-radius: 4px;
-  border: 1px solid rgba(239, 71, 67, 0.2);
-  white-space: nowrap;
-  animation: fadeIn 0.3s ease;
-}
-
-@keyframes glowPulseRed {
-
-  0%,
-  100% {
-    box-shadow: 0 0 10px rgba(239, 71, 67, 0.1);
-  }
-
-  50% {
-    box-shadow: 0 0 20px rgba(239, 71, 67, 0.3);
-  }
-}
-
-.pulse-ring {
-  animation: pulseRing 1.5s cubic-bezier(0.24, 0, 0.38, 1) infinite;
-}
-
-@keyframes pulseRing {
-  0% {
-    transform: scale(0.7);
-    opacity: 0.5;
-  }
-
-  100% {
-    transform: scale(1.5);
-    opacity: 0;
-  }
+    font-size: 11px;
+    font-family: var(--font-mono);
+    color: var(--accent);
+    letter-spacing: 0.02em;
+    max-width: 250px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
 }
 
 .voice-error {
-  position: absolute;
-  bottom: 100%;
-  right: 0;
-  background: var(--red-dim);
-  border: 1px solid var(--red);
-  color: var(--red);
-  font-size: 11px;
-  padding: 4px 8px;
-  border-radius: 4px;
-  margin-bottom: 8px;
-  white-space: nowrap;
-  animation: fadeIn 0.3s ease;
+    font-size: 11px;
+    color: var(--red);
+    margin-top: 4px;
+    padding-left: 4px;
 }

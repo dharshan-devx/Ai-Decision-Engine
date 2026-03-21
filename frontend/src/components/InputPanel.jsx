@@ -33,7 +33,7 @@ export default function InputPanel({
           placeholder="Describe your decision or dilemma in plain language. Be specific about context, constraints, and what's at stake..."
           value={dilemma}
           onChange={(e) => setDilemma(e.target.value)}
-          rows={6}
+          rows={4}
         />
         <VoiceInput
           onTranscript={(text) => setDilemma(prev => prev ? `${prev} ${text}` : text)}
