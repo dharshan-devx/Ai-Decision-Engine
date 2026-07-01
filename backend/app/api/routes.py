@@ -22,17 +22,17 @@ async def upload_context(file: UploadFile = File(...)):
 @router.get("/health")
 async def health():
     """
-    Returns stored AI status. Does NOT make any external API calls.
+    Returns stored AI status via Redis. Does NOT make any external API calls.
     Status is updated event-driven from real /analyze and /followup requests.
     """
-    return ai_status.to_dict()
+    return await ai_status.to_dict()
 
 
 @router.post("/analyze", response_model=AnalyzeResponse)
 async def analyze(request: AnalyzeRequest, req: Request):
     try:
         if not request.api_key:
-            limiter.check(req)
+            await limiter.check(req)
         result = await analyze_decision(request)
         return AnalyzeResponse(success=True, data=result)
     except HTTPException:
@@ -52,7 +52,7 @@ async def analyze(request: AnalyzeRequest, req: Request):
 async def followup(request: FollowUpRequest, req: Request):
     try:
         if not request.api_key:
-            limiter.check(req)
+            await limiter.check(req)
         answer = await run_followup(
             dilemma=request.dilemma,
             context_summary=request.context_summary,
@@ -74,10 +74,11 @@ async def followup(request: FollowUpRequest, req: Request):
 @router.post("/health/reset")
 async def reset_health():
     """Manual reset of AI status (e.g., after updating API key)."""
-    ai_status.reset()
-    return {"status": "ok", "message": "AI status reset to unknown", "ai_layer": ai_status.status}
+    await ai_status.reset()
+    status_dict = await ai_status.to_dict()
+    return {"status": "ok", "message": "AI status reset to unknown", "ai_layer": status_dict["ai_layer"]}
 
 
 @router.get("/usage")
 async def usage(req: Request):
-    return limiter.remaining(req)
+    return await limiter.remaining(req)

@@ -1,8 +1,10 @@
 import json
 import asyncio
+import hashlib
 from google import genai
 from app.core.config import get_settings
 from app.core.ai_status import ai_status
+from app.core.redis_client import redis_client
 
 SYSTEM_PROMPT = """You are a world-class strategic mentor — part visionary founder, part empathetic coach, and part analytical genius.
 You transform life and career dilemmas into empowering strategic frameworks.
@@ -225,8 +227,8 @@ def repair_json(raw: str) -> dict:
 
 
 async def run_analysis(dilemma: str, age: str, risk_profile: str, time_horizon: str, context: str = "", api_key: str = None, language: str = "english") -> dict:
-    if not api_key and not ai_status.can_attempt_request():
-        r = ai_status.get_retry_remaining_seconds()
+    if not api_key and not await ai_status.can_attempt_request():
+        r = await ai_status.get_retry_remaining_seconds()
         raise Exception(f"429 RESOURCE_EXHAUSTED: AI quota exceeded. Try again in {r // 3600}h {(r % 3600) // 60}m.")
 
     settings = get_settings()
@@ -234,6 +236,17 @@ async def run_analysis(dilemma: str, age: str, risk_profile: str, time_horizon: 
     client = genai.Client(api_key=client_key)
 
     base_prompt = build_agent_prompt(dilemma, age, risk_profile, time_horizon, context, language)
+
+    # Cache Check
+    # Hash the input parameters to form a unique cache key
+    cache_key_data = f"{dilemma}|{age}|{risk_profile}|{time_horizon}|{context}|{language}"
+    cache_key = f"analysis_cache:{hashlib.sha256(cache_key_data.encode()).hexdigest()}"
+    
+    # If no custom api_key is provided, we can check the cache
+    if not api_key:
+        cached_result = await redis_client.get(cache_key)
+        if cached_result:
+            return json.loads(cached_result)
 
     # Run Agent A and Agent B concurrently
     async def run_agent(sys_instruction: str) -> str:
@@ -275,7 +288,9 @@ async def run_analysis(dilemma: str, age: str, risk_profile: str, time_horizon: 
 
         # Only report success for server-key requests (not custom keys)
         if not api_key:
-            ai_status.report_success()
+            await ai_status.report_success()
+            # Save successful response to Redis cache for 24 hours (86400 seconds)
+            await redis_client.set(cache_key, json.dumps(result), ex=86400)
 
         return result
 
@@ -292,7 +307,7 @@ async def run_analysis(dilemma: str, age: str, risk_profile: str, time_horizon: 
                         retry_delay = int(float(match.group(1)))
                     except Exception:
                         pass
-            ai_status.report_error(e, retry_delay_seconds=retry_delay)
+            await ai_status.report_error(e, retry_delay_seconds=retry_delay)
         raise
 
 
@@ -303,8 +318,8 @@ Respond in clear, analytical prose (no JSON, no fluff)."""
 
 async def run_followup(dilemma: str, context_summary: str, question: str, api_key: str = None) -> str:
     """Handle follow-up questions using existing analysis context."""
-    if not api_key and not ai_status.can_attempt_request():
-        r = ai_status.get_retry_remaining_seconds()
+    if not api_key and not await ai_status.can_attempt_request():
+        r = await ai_status.get_retry_remaining_seconds()
         raise Exception(f"429 RESOURCE_EXHAUSTED: AI quota exceeded. Try again in {r // 3600}h {(r % 3600) // 60}m.")
 
     settings = get_settings()
@@ -337,7 +352,7 @@ Do NOT return JSON — respond in clear prose."""
 
         # Only report success for server-key requests
         if not api_key:
-            ai_status.report_success()
+            await ai_status.report_success()
 
         return response.text.strip()
 
@@ -353,6 +368,6 @@ Do NOT return JSON — respond in clear prose."""
                         retry_delay = int(float(match.group(1)))
                     except Exception:
                         pass
-            ai_status.report_error(e, retry_delay_seconds=retry_delay)
+            await ai_status.report_error(e, retry_delay_seconds=retry_delay)
         raise
 
